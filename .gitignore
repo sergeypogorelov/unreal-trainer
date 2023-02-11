@@ -23,6 +23,10 @@
 # Any file in /RawContent dir will be managed by git lfs.
 !/RawContent/**/*
 
+# Allow license and readme files
+!/LICENSE
+!/README.md
+
 # OS/platform generated files.
 
 # Windows
