@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "UnrealTrainerGameModeBase.generated.h"
 
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(Abstract, BlueprintType, Blueprintable)
 class UNREALTRAINER_API AUnrealTrainerGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
