@@ -1,17 +1,34 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GameShared/UnrealTrainerGameModeBase.h"
-#include "GameShared/EntityRegistrySubsystem.h"
+#include "GameShared/ConfigRegistrySubsystem.h"
+#include "GameShared/EntityEventSubsystem.h"
+#include "GameShared/PrintUtils.h"
 
 void AUnrealTrainerGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UEntityRegistrySubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
-	TArray<AActor*> Actors = Subsystem->GetEntitiesByType(EEntityTypes::Spot);
-	UE_LOG(LogTemp, Warning, TEXT("Found Actors:"));
-	for (const AActor* FoundActor : Actors)
+	UConfigRegistrySubsystem* ConfigRegistrySubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
+
+	if (GamePlaySettings)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Found Actor - %s"), *FoundActor->GetFullName());
+		ConfigRegistrySubsystem->GamePlaySettingsPtr = GamePlaySettings;
 	}
+	else
+	{
+		UPrintUtils::PrintAsError(TEXT("GamePlaySettings are not defined."));
+	}
+
+	if (TrainingSettings)
+	{
+		ConfigRegistrySubsystem->TrainingSettingsPtr = TrainingSettings;
+	}
+	else
+	{
+		UPrintUtils::PrintAsError(TEXT("TrainingSettings are not defined."));
+	}
+
+	const UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EntityEventSubsystem->OnGameModeBeginPlay.Broadcast();
 }
