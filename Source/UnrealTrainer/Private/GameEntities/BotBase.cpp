@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GameEntities/BotBase.h"
-#include "GameShared/EntityRegistrySubsystem.h"
+#include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 
 ABotBase::ABotBase()
 {

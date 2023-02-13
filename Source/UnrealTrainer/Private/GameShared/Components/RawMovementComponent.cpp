@@ -1,6 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "GameShared/RawMovementComponent.h"
+#include "GameShared/Components/RawMovementComponent.h"
 
 URawMovementComponent::URawMovementComponent()
 {

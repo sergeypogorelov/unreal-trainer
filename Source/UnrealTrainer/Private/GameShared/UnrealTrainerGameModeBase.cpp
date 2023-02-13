@@ -1,9 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GameShared/UnrealTrainerGameModeBase.h"
-#include "GameShared/ConfigRegistrySubsystem.h"
-#include "GameShared/EntityEventSubsystem.h"
-#include "GameShared/PrintUtils.h"
+#include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
+#include "GameShared/Subsystems/EntityEventSubsystem.h"
+#include "GameShared/Utils/PrintUtils.h"
 
 void AUnrealTrainerGameModeBase::BeginPlay()
 {

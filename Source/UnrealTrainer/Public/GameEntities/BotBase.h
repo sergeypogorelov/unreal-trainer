@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
 #include "GameFramework/Pawn.h"
-#include "GameShared/RawMovementComponent.h"
+#include "GameShared/Components/RawMovementComponent.h"
 #include "BotBase.generated.h"
 
 UCLASS(Abstract, BlueprintType, Blueprintable)

@@ -1,6 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "GameShared/PrintUtils.h"
+#include "GameShared/Utils/PrintUtils.h"
 
 void UPrintUtils::PrintAsError(const FString& Message, const float TimeToDisplay)
 {

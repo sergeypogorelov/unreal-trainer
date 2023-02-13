@@ -1,8 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "GameShared/EntityRegistrySubsystem.h"
+#include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
-#include "GameShared/PrintUtils.h"
+#include "GameShared/Utils/PrintUtils.h"
 
 void UEntityRegistrySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
