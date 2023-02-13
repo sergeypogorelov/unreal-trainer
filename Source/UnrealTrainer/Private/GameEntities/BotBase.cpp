@@ -1,19 +1,21 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "GameEntities/SpotBase.h"
+#include "GameEntities/BotBase.h"
 #include "GameShared/EntityRegistrySubsystem.h"
 
-ASpotBase::ASpotBase()
+ABotBase::ABotBase()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+	
+	RawMovementComponent = CreateDefaultSubobject<URawMovementComponent>(TEXT("RawMovementComponent"));
 }
 
-TEnumAsByte<EEntityTypes> ASpotBase::GetEntityType() const
+TEnumAsByte<EEntityTypes> ABotBase::GetEntityType() const
 {
-	return Spot;
+	return Bot;
 }
 
-void ASpotBase::BeginPlay()
+void ABotBase::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -21,7 +23,7 @@ void ASpotBase::BeginPlay()
 	Subsystem->RegisterEntity(this);
 }
 
-void ASpotBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ABotBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UEntityRegistrySubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
 	Subsystem->UnregisterEntity(this);

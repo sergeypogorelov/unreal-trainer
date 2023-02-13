@@ -2,6 +2,7 @@
 
 #include "GameShared/EntityRegistrySubsystem.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
+#include "GameShared/PrintUtils.h"
 
 void UEntityRegistrySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -39,6 +40,7 @@ void UEntityRegistrySubsystem::RegisterEntity(AActor* Actor)
 	const IGameEntityInterface* GameEntity = Cast<IGameEntityInterface>(Actor);
 	if (GameEntity == nullptr)
 	{
+		UPrintUtils::PrintAsWarning(TEXT("Attempt to register a not entity"));
 		return;
 	}
 
@@ -56,6 +58,7 @@ void UEntityRegistrySubsystem::UnregisterEntity(AActor* Actor)
 	const IGameEntityInterface* GameEntity = Cast<IGameEntityInterface>(Actor);
 	if (GameEntity == nullptr)
 	{
+		UPrintUtils::PrintAsWarning(TEXT("Attempt to unregister a not entity"));
 		return;
 	}
 

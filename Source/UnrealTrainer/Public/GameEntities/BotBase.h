@@ -3,20 +3,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/TargetPoint.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
-#include "SpotBase.generated.h"
+#include "GameFramework/Pawn.h"
+#include "GameShared/RawMovementComponent.h"
+#include "BotBase.generated.h"
 
 UCLASS(Abstract, BlueprintType, Blueprintable)
-class UNREALTRAINER_API ASpotBase : public ATargetPoint, public IGameEntityInterface
+class UNREALTRAINER_API ABotBase : public APawn, public IGameEntityInterface
 {
 	GENERATED_BODY()
 
 public:
-	ASpotBase();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	URawMovementComponent* RawMovementComponent;
+	
+	ABotBase();
 
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
