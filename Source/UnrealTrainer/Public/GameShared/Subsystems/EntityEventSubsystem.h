@@ -12,4 +12,6 @@ class UNREALTRAINER_API UEntityEventSubsystem : public UGameInstanceSubsystem
 
 public:
 	TMulticastDelegate<void()> OnGameModeBeginPlay;
+
+	virtual void Deinitialize() override;
 };

@@ -13,4 +13,7 @@ class UNREALTRAINER_API UTrainingSettings : public UDataAsset
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 CountOfAgents = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float AreasOffset = 50;
 };

@@ -13,4 +13,5 @@ enum EEntityTypes
 	Reward,
 	Spot,
 	Area,
+	Trainer
 };

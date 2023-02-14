@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameCore/DataAssets/GamePlaySettings.h"
 #include "GameCore/DataAssets/TrainingSettings.h"
+#include "GameEntities/TrainingAreaBase.h"
 #include "GameFramework/GameModeBase.h"
 #include "UnrealTrainerGameModeBase.generated.h"
 
@@ -20,5 +21,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UTrainingSettings* TrainingSettings;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<ATrainingAreaBase> TrainingAreaClass;
+
 	virtual void BeginPlay() override;
+private:
+	bool SpawnTrainingAreas();
 };
