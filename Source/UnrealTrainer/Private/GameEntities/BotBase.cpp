@@ -6,6 +6,11 @@
 ABotBase::ABotBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	SphereComponent->InitSphereRadius(50.f);
+	SphereComponent->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+	RootComponent = SphereComponent;
 	
 	RawMovementComponent = CreateDefaultSubobject<URawMovementComponent>(TEXT("RawMovementComponent"));
 }

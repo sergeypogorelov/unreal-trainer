@@ -35,6 +35,29 @@ TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesByType(const TEnumAsByte<EE
 	return FoundActors;
 }
 
+TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const
+{
+	TArray<AActor*> FoundActors;
+	
+	for (const TTuple<TEnumAsByte<EEntityTypes>, TArray<TWeakObjectPtr<AActor>>> Pair : EntityMap)
+	{
+		if (Pair.Key == EntityType)
+		{
+			continue;
+		}
+
+		for (const TWeakObjectPtr<AActor> ActorPtr : Pair.Value)
+		{
+			if (ActorPtr.IsValid())
+			{
+				FoundActors.Add(ActorPtr.Get());
+			}
+		}
+	}
+
+	return FoundActors;
+}
+
 void UEntityRegistrySubsystem::RegisterEntity(AActor* Actor)
 {
 	const IGameEntityInterface* GameEntity = Cast<IGameEntityInterface>(Actor);

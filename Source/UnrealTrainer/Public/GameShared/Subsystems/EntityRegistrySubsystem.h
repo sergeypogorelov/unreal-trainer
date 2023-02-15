@@ -16,6 +16,7 @@ public:
 	virtual void Deinitialize() override;
 
 	TArray<AActor*> GetEntitiesByType(TEnumAsByte<EEntityTypes> EntityType) const;
+	TArray<AActor*> GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const;
 	
 	void RegisterEntity(AActor* Actor);
 	void UnregisterEntity(AActor* Actor);
