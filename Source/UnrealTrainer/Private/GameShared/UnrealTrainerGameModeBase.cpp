@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GameShared/UnrealTrainerGameModeBase.h"
+#include "GameEntities/GamePlayState.h"
 #include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
@@ -14,9 +15,11 @@ void AUnrealTrainerGameModeBase::BeginPlay()
 	if (!TryInitConfigs()) return;
 	if (!TryInitOriginTrainingArea()) return;
 	if (!TryInitOriginSpots()) return;
-	if (!TrySpawnOtherTrainingAreas()) return;
-	if (!TrySpawnOtherEntities()) return;
+	if (!TrySpawnTrainingAreas()) return;
+	if (!TrySpawnStaticEntities()) return;
 
+	SetUpEventHandlers();
+	
 	const UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
 	EntityEventSubsystem->OnGameModeBeginPlay.Broadcast();
 }
@@ -88,7 +91,7 @@ bool AUnrealTrainerGameModeBase::TryInitOriginSpots()
 	return true;
 }
 
-bool AUnrealTrainerGameModeBase::TrySpawnOtherTrainingAreas()
+bool AUnrealTrainerGameModeBase::TrySpawnTrainingAreas()
 {
 	if (TrainingAreaClass == nullptr)
 	{
@@ -111,7 +114,17 @@ bool AUnrealTrainerGameModeBase::TrySpawnOtherTrainingAreas()
 	return true;
 }
 
-bool AUnrealTrainerGameModeBase::TrySpawnOtherEntities()
+bool AUnrealTrainerGameModeBase::TrySpawnStaticEntities()
+{
+	for (int32 i = 0; i < TrainingSettings->CountOfAgents; ++i)
+	{
+		GetWorld()->SpawnActor<AGamePlayState>();
+	}
+
+	return true;
+}
+
+bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities()
 {
 	if (BotClass == nullptr)
 	{
@@ -157,4 +170,20 @@ bool AUnrealTrainerGameModeBase::TrySpawnOtherEntities()
 	GetWorld()->SpawnActor(BotClass, &SpotTransforms[Index]);
 	
 	return true;
+}
+
+void AUnrealTrainerGameModeBase::SetUpEventHandlers()
+{
+	UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EntityEventSubsystem->OnRespawnRequest.AddLambda([this, EntityEventSubsystem]()
+	{
+		if (TrySpawnDynamicEntities())
+		{
+			EntityEventSubsystem->OnRespawnComplete.Broadcast();
+		}
+		else
+		{
+			UPrintUtils::PrintAsError(TEXT("Failed to respawn entities"));
+		}
+	});
 }

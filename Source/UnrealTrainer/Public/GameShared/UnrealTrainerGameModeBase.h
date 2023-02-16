@@ -44,6 +44,8 @@ private:
 	bool TryInitConfigs();
 	bool TryInitOriginTrainingArea();
 	bool TryInitOriginSpots();
-	bool TrySpawnOtherTrainingAreas();
-	bool TrySpawnOtherEntities();
+	bool TrySpawnTrainingAreas();
+	bool TrySpawnStaticEntities();
+	bool TrySpawnDynamicEntities();
+	void SetUpEventHandlers();
 };
