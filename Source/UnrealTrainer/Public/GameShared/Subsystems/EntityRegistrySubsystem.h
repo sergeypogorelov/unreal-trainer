@@ -17,6 +17,7 @@ public:
 
 	TArray<AActor*> GetEntitiesByType(TEnumAsByte<EEntityTypes> EntityType) const;
 	TArray<AActor*> GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const;
+	TArray<AActor*> GetEntitiesExceptByTypes(TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const;
 	
 	void RegisterEntity(AActor* Actor);
 	void UnregisterEntity(AActor* Actor);

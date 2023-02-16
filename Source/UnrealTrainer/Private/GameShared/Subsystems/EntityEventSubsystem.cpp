@@ -5,6 +5,13 @@
 void UEntityEventSubsystem::Deinitialize()
 {
 	OnGameModeBeginPlay.Clear();
+	OnRespawnRequest.Clear();
+	OnRespawnComplete.Clear();
+	OnRoundStart.Clear();
+	OnStepStart.Clear();
+	OnStepEnd.Clear();
+	OnRewardCollected.Clear();
+	OnRoundEnd.Clear();
 	
 	Super::Deinitialize();
 }

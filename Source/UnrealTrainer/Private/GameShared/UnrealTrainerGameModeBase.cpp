@@ -24,6 +24,14 @@ void AUnrealTrainerGameModeBase::BeginPlay()
 	EntityEventSubsystem->OnGameModeBeginPlay.Broadcast();
 }
 
+void AUnrealTrainerGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EntityEventSubsystem->OnRespawnRequest.RemoveAll(this);
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 bool AUnrealTrainerGameModeBase::TryInitConfigs()
 {
 	if (GamePlaySettings == nullptr)
@@ -145,7 +153,7 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities()
 	}
 	
 	const UEntityRegistrySubsystem* RegistrySubsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
-	const TArray<AActor*> RegisteredEntities = RegistrySubsystem->GetEntitiesExceptByType(Area);
+	const TArray<AActor*> RegisteredEntities = RegistrySubsystem->GetEntitiesExceptByTypes({ Area, State });
 	for (AActor* Entity : RegisteredEntities)
 	{
 		Entity->Destroy();
@@ -175,15 +183,19 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities()
 void AUnrealTrainerGameModeBase::SetUpEventHandlers()
 {
 	UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EntityEventSubsystem->OnRespawnRequest.AddLambda([this, EntityEventSubsystem]()
+	EntityEventSubsystem->OnRespawnRequest.AddUObject(this, &AUnrealTrainerGameModeBase::OnRespawnRequest);
+}
+
+void AUnrealTrainerGameModeBase::OnRespawnRequest()
+{
+	const UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	
+	if (TrySpawnDynamicEntities())
 	{
-		if (TrySpawnDynamicEntities())
-		{
-			EntityEventSubsystem->OnRespawnComplete.Broadcast();
-		}
-		else
-		{
-			UPrintUtils::PrintAsError(TEXT("Failed to respawn entities"));
-		}
-	});
+		EntityEventSubsystem->OnRespawnComplete.Broadcast();
+	}
+	else
+	{
+		UPrintUtils::PrintAsError(TEXT("Failed to respawn entities"));
+	}
 }

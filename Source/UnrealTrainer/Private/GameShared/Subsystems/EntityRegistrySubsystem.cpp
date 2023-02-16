@@ -37,11 +37,16 @@ TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesByType(const TEnumAsByte<EE
 
 TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const
 {
+	return GetEntitiesExceptByTypes({ EntityType });
+}
+
+TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesExceptByTypes(TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const
+{
 	TArray<AActor*> FoundActors;
 	
 	for (const TTuple<TEnumAsByte<EEntityTypes>, TArray<TWeakObjectPtr<AActor>>> Pair : EntityMap)
 	{
-		if (Pair.Key == EntityType)
+		if (EntityTypes.Contains(Pair.Key))
 		{
 			continue;
 		}

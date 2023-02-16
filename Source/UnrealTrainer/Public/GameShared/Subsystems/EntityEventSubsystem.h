@@ -17,6 +17,7 @@ public:
 	TMulticastDelegate<void()> OnRoundStart;
 	TMulticastDelegate<void()> OnStepStart;
 	TMulticastDelegate<void()> OnStepEnd;
+	TMulticastDelegate<void()> OnRewardCollected;
 	TMulticastDelegate<void(bool)> OnRoundEnd;
 	
 	virtual void Deinitialize() override;
