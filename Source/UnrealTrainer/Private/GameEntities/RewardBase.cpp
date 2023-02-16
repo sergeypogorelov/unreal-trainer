@@ -18,6 +18,8 @@ void ARewardBase::CollectReward()
 {
 	const UEntityEventSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
 	Subsystem->OnRewardCollected.Broadcast();
+
+	Destroy();
 }
 
 void ARewardBase::BeginPlay()
@@ -26,12 +28,6 @@ void ARewardBase::BeginPlay()
 
 	UEntityRegistrySubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
 	Subsystem->RegisterEntity(this);
-
-	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRewardCollected.AddLambda([this]()
-	{
-		Destroy();
-	});
 }
 
 void ARewardBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
