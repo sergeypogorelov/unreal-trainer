@@ -45,8 +45,6 @@ void ABotBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UEntityRegistrySubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
 	Subsystem->UnregisterEntity(this);
-
-	SphereComponent->OnComponentHit.RemoveAll(this);
 	
 	Super::EndPlay(EndPlayReason);
 }

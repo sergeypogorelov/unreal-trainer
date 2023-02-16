@@ -26,12 +26,11 @@ private:
 	int32 RewardsCollected;
 	FTimerHandle StepTimerHandle;
 
-	void OnGameModeBeginPlay();
 	void ResetRoundState();
 	void StartRound();
 	void SetStepTimer();
 	void ClearStepTimer();
 	void OnStepTimerComplete();
-	void OnRewardCollected();
 	void StopRound(const bool bIsVictorious);
+	void SetUpEventHandlers();
 };

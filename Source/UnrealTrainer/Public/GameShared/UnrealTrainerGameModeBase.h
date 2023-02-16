@@ -33,7 +33,6 @@ public:
 	TSubclassOf<ARewardBase> RewardClass;
 
 	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
 	float OriginTrainingAreaLengthOnX = 0.f;
 	float OriginTrainingAreaLengthOnY = 0.f;
@@ -49,5 +48,4 @@ private:
 	bool TrySpawnStaticEntities();
 	bool TrySpawnDynamicEntities();
 	void SetUpEventHandlers();
-	void OnRespawnRequest();
 };

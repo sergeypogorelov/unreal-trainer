@@ -26,7 +26,8 @@ public:
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
 protected:
 	UFUNCTION()
-	void OnSphereComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector Normal, const FHitResult& HitResult);
+	void OnSphereComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+		FVector Normal, const FHitResult& HitResult);
 	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

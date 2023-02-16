@@ -24,28 +24,16 @@ void AGamePlayState::BeginPlay()
 	
 	UEntityRegistrySubsystem* RegistrySubsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
 	RegistrySubsystem->RegisterEntity(this);
-	
-	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRewardCollected.AddUObject(this, &AGamePlayState::OnRewardCollected);
-	EventSubsystem->OnRespawnComplete.AddUObject(this, &AGamePlayState::StartRound);
-	EventSubsystem->OnGameModeBeginPlay.AddUObject(this, &AGamePlayState::OnGameModeBeginPlay);
+
+	SetUpEventHandlers();
 }
 
 void AGamePlayState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UEntityRegistrySubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
 	Subsystem->UnregisterEntity(this);
-
-	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnGameModeBeginPlay.RemoveAll(this);
 	
 	Super::EndPlay(EndPlayReason);
-}
-
-void AGamePlayState::OnGameModeBeginPlay()
-{
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRespawnRequest.Broadcast();
 }
 
 void AGamePlayState::ResetRoundState()
@@ -60,8 +48,6 @@ void AGamePlayState::ResetRoundState()
 
 void AGamePlayState::StartRound()
 {
-	UPrintUtils::PrintAsWarning(TEXT("StartRound"));
-	
 	if (bIsRoundStarted)
 	{
 		UPrintUtils::PrintAsWarning(TEXT("Attempt to start round when it is alredy started"));
@@ -104,8 +90,6 @@ void AGamePlayState::ClearStepTimer()
 
 void AGamePlayState::OnStepTimerComplete()
 {
-	UPrintUtils::PrintAsWarning(TEXT("OnStepTimerComplete"));
-	
 	++StepsCompleted;
 	
 	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
@@ -123,23 +107,8 @@ void AGamePlayState::OnStepTimerComplete()
 	}
 }
 
-void AGamePlayState::OnRewardCollected()
-{
-	UPrintUtils::PrintAsWarning(TEXT("OnRewardCollected"));
-	
-	++RewardsCollected;
-
-	const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
-	if (RewardsCollected == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
-	{
-		StopRound(true);
-	}
-}
-
 void AGamePlayState::StopRound(const bool bIsVictorious)
 {
-	UPrintUtils::PrintAsWarning(TEXT("StopRound"));
-	
 	if (bIsRoundStopped)
 	{
 		UPrintUtils::PrintAsWarning(TEXT("Attempt to stop round when it is alredy stopped"));
@@ -156,4 +125,28 @@ void AGamePlayState::StopRound(const bool bIsVictorious)
 	/// TODO: remove once trainer is implemented
 	ResetRoundState();
 	EventSubsystem->OnRespawnRequest.Broadcast();
+}
+
+void AGamePlayState::SetUpEventHandlers()
+{
+	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EventSubsystem->OnRewardCollected.AddLambda([this]()
+	{
+		++RewardsCollected;
+
+		const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
+		if (RewardsCollected == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
+		{
+			StopRound(true);
+		}
+	});
+	EventSubsystem->OnRespawnComplete.AddLambda([this]()
+	{
+		StartRound();
+	});
+	EventSubsystem->OnGameModeBeginPlay.AddLambda([this]()
+	{
+		const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+		EventSubsystem->OnRespawnRequest.Broadcast();
+	});
 }
