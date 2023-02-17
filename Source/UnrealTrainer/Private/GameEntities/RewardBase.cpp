@@ -14,10 +14,20 @@ TEnumAsByte<EEntityTypes> ARewardBase::GetEntityType() const
 	return Reward;
 }
 
+int32 ARewardBase::GetSpawnIndex() const
+{
+	return SpawnIndex;
+}
+
+void ARewardBase::SetSpawnIndex(const int32 SpawnIndexVar)
+{
+	SpawnIndex = SpawnIndexVar;
+}
+
 void ARewardBase::CollectReward()
 {
 	const UEntityEventSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	Subsystem->OnRewardCollected.Broadcast();
+	Subsystem->OnRewardCollected.Broadcast(GetSpawnIndex());
 
 	Destroy();
 }

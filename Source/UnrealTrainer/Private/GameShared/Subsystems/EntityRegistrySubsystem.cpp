@@ -2,6 +2,7 @@
 
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
+#include "GameCore/Interfaces/GameMultiSpawnInterface.h"
 #include "GameShared/Utils/PrintUtils.h"
 
 void UEntityRegistrySubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -61,6 +62,23 @@ TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesExceptByTypes(TArray<TEnumA
 	}
 
 	return FoundActors;
+}
+
+TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesBySpawnIndexExceptByType(const int32 SpawnIndex,
+	TEnumAsByte<EEntityTypes> EntityType) const
+{
+	return GetEntitiesBySpawnIndexExceptByTypes(SpawnIndex, { EntityType });
+}
+
+TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesBySpawnIndexExceptByTypes(const int32 SpawnIndex,
+	TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const
+{
+	const TArray<AActor*> FoundActors = GetEntitiesExceptByTypes(EntityTypes);
+	return FoundActors.FilterByPredicate([SpawnIndex](AActor* CurrentActor)
+	{
+		const IGameMultiSpawnInterface* MultiSpawnActor = Cast<IGameMultiSpawnInterface>(CurrentActor);
+		return MultiSpawnActor != nullptr && MultiSpawnActor->GetSpawnIndex() == SpawnIndex;
+	});
 }
 
 void UEntityRegistrySubsystem::RegisterEntity(AActor* Actor)

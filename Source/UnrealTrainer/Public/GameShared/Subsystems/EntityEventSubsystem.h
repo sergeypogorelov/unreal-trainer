@@ -12,13 +12,13 @@ class UNREALTRAINER_API UEntityEventSubsystem : public UGameInstanceSubsystem
 
 public:
 	TMulticastDelegate<void()> OnGameModeBeginPlay;
-	TMulticastDelegate<void()> OnRespawnRequest;
-	TMulticastDelegate<void()> OnRespawnComplete;
-	TMulticastDelegate<void()> OnRoundStart;
-	TMulticastDelegate<void()> OnStepStart;
-	TMulticastDelegate<void()> OnStepEnd;
-	TMulticastDelegate<void()> OnRewardCollected;
-	TMulticastDelegate<void(bool)> OnRoundEnd;
+	TMulticastDelegate<void(const int32 SpawnIndex)> OnRespawnRequest;
+	TMulticastDelegate<void(const int32 SpawnIndex)> OnRespawnComplete;
+	TMulticastDelegate<void(const int32 SpawnIndex)> OnRoundStart;
+	TMulticastDelegate<void(const int32 SpawnIndex)> OnStepStart;
+	TMulticastDelegate<void(const int32 SpawnIndex)> OnStepEnd;
+	TMulticastDelegate<void(const int32 SpawnIndex)> OnRewardCollected;
+	TMulticastDelegate<void(const int32 SpawnIndex, const bool bIsVictorious)> OnRoundEnd;
 	
 	virtual void Deinitialize() override;
 };

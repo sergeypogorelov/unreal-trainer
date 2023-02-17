@@ -101,10 +101,8 @@ bool AUnrealTrainerGameModeBase::TrySpawnTrainingAreas()
 
 	for (int32 i = 1; i < TrainingSettings->CountOfAgents; ++i)
 	{
-		FTransform NewTransform(OriginTrainingAreaTransform);
-		FVector NewLocation(OriginTrainingAreaTransform.GetLocation());
-		NewLocation.X += ((OriginTrainingAreaLengthOnX + TrainingSettings->AreasOffset) * i);
-		NewTransform.SetLocation(NewLocation);
+		FTransform NewTransform;
+		ChangeTransformBySpawnIndex(NewTransform, OriginTrainingAreaTransform, i);
 
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.Template = OriginTrainingAreaPtr.Get();
@@ -118,13 +116,20 @@ bool AUnrealTrainerGameModeBase::TrySpawnStaticEntities()
 {
 	for (int32 i = 0; i < TrainingSettings->CountOfAgents; ++i)
 	{
-		GetWorld()->SpawnActor<AGamePlayState>();
+		AGamePlayState* GamePlayState = GetWorld()->SpawnActor<AGamePlayState>();
+		
+		if (GamePlayState == nullptr)
+		{
+			return false;
+		}
+		
+		GamePlayState->SetSpawnIndex(i);
 	}
 
 	return true;
 }
 
-bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities()
+bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32 SpawnIndex)
 {
 	if (BotClass == nullptr)
 	{
@@ -145,12 +150,13 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities()
 	}
 	
 	const UEntityRegistrySubsystem* RegistrySubsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
-	const TArray<AActor*> RegisteredEntities = RegistrySubsystem->GetEntitiesExceptByTypes({ Area, State });
+	const TArray<AActor*> RegisteredEntities = RegistrySubsystem->GetEntitiesBySpawnIndexExceptByTypes(SpawnIndex, { Area, State });
 	for (AActor* Entity : RegisteredEntities)
 	{
 		Entity->Destroy();
 	}
 
+	TArray<AActor*> SpawnedActors;
 	TArray<FTransform> SpotTransforms = OriginSpotTransforms;
 	if (GamePlaySettings->bShouldRandomize)
 	{
@@ -163,11 +169,22 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities()
 	int32 Index = 0;
 	for (int32 i = 0; i < GamePlaySettings->CountOfRewardsToSpawn; ++Index, ++i)
 	{
-		GetWorld()->SpawnActor(RewardClass, &SpotTransforms[Index]);
-		
+		FTransform NewTransform;
+		ChangeTransformBySpawnIndex(NewTransform, SpotTransforms[Index], SpawnIndex);
+		AActor* SpawnedActor = GetWorld()->SpawnActor(RewardClass, &NewTransform);
+		SpawnedActors.Add(SpawnedActor);
 	}
 
-	GetWorld()->SpawnActor(BotClass, &SpotTransforms[Index]);
+	FTransform NewTransform;
+	ChangeTransformBySpawnIndex(NewTransform, SpotTransforms[Index], SpawnIndex);
+	AActor* SpawnedActor = GetWorld()->SpawnActor(BotClass, &NewTransform);
+	SpawnedActors.Add(SpawnedActor);
+
+	for (AActor* Actor : SpawnedActors)
+	{
+		IGameMultiSpawnInterface* MultiSpawnActor = Cast<IGameMultiSpawnInterface>(Actor);
+		MultiSpawnActor->SetSpawnIndex(SpawnIndex);
+	}
 	
 	return true;
 }
@@ -175,15 +192,24 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities()
 void AUnrealTrainerGameModeBase::SetUpEventHandlers()
 {
 	UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EntityEventSubsystem->OnRespawnRequest.AddLambda([this, EntityEventSubsystem]()
+	EntityEventSubsystem->OnRespawnRequest.AddLambda([this, EntityEventSubsystem](const int32 SpawnIndex)
 	{
-		if (TrySpawnDynamicEntities())
+		if (TrySpawnDynamicEntities(SpawnIndex))
 		{
-			EntityEventSubsystem->OnRespawnComplete.Broadcast();
+			EntityEventSubsystem->OnRespawnComplete.Broadcast(SpawnIndex);
 		}
 		else
 		{
 			UPrintUtils::PrintAsError(TEXT("Failed to respawn entities"));
 		}
 	});
+}
+
+void AUnrealTrainerGameModeBase::ChangeTransformBySpawnIndex(FTransform& NewTransform, const FTransform& OriginTransform,
+	const int32 SpawnIndex)
+{
+	NewTransform = OriginTransform;
+	FVector NewLocation(OriginTransform.GetLocation());
+	NewLocation.X += ((OriginTrainingAreaLengthOnX + TrainingSettings->AreasOffset) * SpawnIndex);
+	NewTransform.SetLocation(NewLocation);
 }

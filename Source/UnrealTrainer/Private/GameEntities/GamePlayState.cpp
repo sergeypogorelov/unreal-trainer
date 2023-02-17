@@ -18,6 +18,16 @@ TEnumAsByte<EEntityTypes> AGamePlayState::GetEntityType() const
 	return State;
 }
 
+int32 AGamePlayState::GetSpawnIndex() const
+{
+	return SpawnIndex;
+}
+
+void AGamePlayState::SetSpawnIndex(const int32 SpawnIndexVar)
+{
+	SpawnIndex = SpawnIndexVar;
+}
+
 void AGamePlayState::BeginPlay()
 {
 	Super::BeginPlay();
@@ -57,7 +67,7 @@ void AGamePlayState::StartRound()
 	bIsRoundStarted = true;
 
 	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRoundStart.Broadcast();
+	EventSubsystem->OnRoundStart.Broadcast(GetSpawnIndex());
 	
 	SetStepTimer();
 }
@@ -72,7 +82,7 @@ void AGamePlayState::SetStepTimer()
 	GetWorld()->GetTimerManager().SetTimer(StepTimerHandle, this, &AGamePlayState::OnStepTimerComplete, Rate);
 
 	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnStepStart.Broadcast();
+	EventSubsystem->OnStepStart.Broadcast(GetSpawnIndex());
 }
 
 void AGamePlayState::ClearStepTimer()
@@ -93,7 +103,7 @@ void AGamePlayState::OnStepTimerComplete()
 	++StepsCompleted;
 	
 	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnStepEnd.Broadcast();
+	EventSubsystem->OnStepEnd.Broadcast(GetSpawnIndex());
 
 	const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
 	if (StepsCompleted == ConfigSubsystem->GamePlaySettingsPtr->CountOfSteps)
@@ -120,18 +130,23 @@ void AGamePlayState::StopRound(const bool bIsVictorious)
 	ClearStepTimer();
 
 	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRoundEnd.Broadcast(bIsVictorious);
+	EventSubsystem->OnRoundEnd.Broadcast(GetSpawnIndex(), bIsVictorious);
 
 	/// TODO: remove once trainer is implemented
 	ResetRoundState();
-	EventSubsystem->OnRespawnRequest.Broadcast();
+	EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
 }
 
 void AGamePlayState::SetUpEventHandlers()
 {
 	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRewardCollected.AddLambda([this]()
+	EventSubsystem->OnRewardCollected.AddLambda([this](const int32 SpawnIndexVar)
 	{
+		if (GetSpawnIndex() != SpawnIndexVar)
+		{
+			return;
+		}
+		
 		++RewardsCollected;
 
 		const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
@@ -140,13 +155,18 @@ void AGamePlayState::SetUpEventHandlers()
 			StopRound(true);
 		}
 	});
-	EventSubsystem->OnRespawnComplete.AddLambda([this]()
+	EventSubsystem->OnRespawnComplete.AddLambda([this](const int32 SpawnIndexVar)
 	{
+		if (GetSpawnIndex() != SpawnIndexVar)
+		{
+			return;
+		}
+		
 		StartRound();
 	});
 	EventSubsystem->OnGameModeBeginPlay.AddLambda([this]()
 	{
 		const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-		EventSubsystem->OnRespawnRequest.Broadcast();
+		EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
 	});
 }
