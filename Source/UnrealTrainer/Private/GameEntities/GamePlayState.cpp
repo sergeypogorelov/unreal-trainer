@@ -67,8 +67,8 @@ void AGamePlayState::StartRound()
 
 	bIsRoundStarted = true;
 
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRoundStart.Broadcast(GetSpawnIndex());
+	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EventSubsystem->OnRoundStart(GetSpawnIndex()).Broadcast();
 	
 	SetStepTimer();
 }
@@ -81,9 +81,6 @@ void AGamePlayState::SetStepTimer()
 	const float Rate = ConfigSubsystem->GamePlaySettingsPtr->DurationOfOneStep;
 	
 	GetWorld()->GetTimerManager().SetTimer(StepTimerHandle, this, &AGamePlayState::OnStepTimerComplete, Rate);
-
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnStepStart.Broadcast(GetSpawnIndex());
 }
 
 void AGamePlayState::ClearStepTimer()
@@ -102,9 +99,6 @@ void AGamePlayState::ClearStepTimer()
 void AGamePlayState::OnStepTimerComplete()
 {
 	++StepsCompleted;
-	
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnStepEnd.Broadcast(GetSpawnIndex());
 
 	const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
 	if (StepsCompleted == ConfigSubsystem->GamePlaySettingsPtr->CountOfSteps)
@@ -130,8 +124,8 @@ void AGamePlayState::StopRound(const bool bIsVictorious)
 	
 	ClearStepTimer();
 
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRoundEnd.Broadcast(GetSpawnIndex(), bIsVictorious);
+	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EventSubsystem->OnRoundEnd(GetSpawnIndex()).Broadcast(bIsVictorious);
 
 	/// TODO: remove once trainer is implemented
 	ResetRoundState();
@@ -144,13 +138,9 @@ void AGamePlayState::SetUpEventHandlers()
 	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this]()
 	{
 		UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-		EventSubsystem->OnRewardCollected.AddLambda([this](const int32 SpawnIndexVar)
+		
+		EventSubsystem->OnRewardCollected(GetSpawnIndex()).AddLambda([this]()
 		{
-			if (GetSpawnIndex() != SpawnIndexVar)
-			{
-				return;
-			}
-			
 			++RewardsCollected;
 
 			const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
@@ -159,6 +149,7 @@ void AGamePlayState::SetUpEventHandlers()
 				StopRound(true);
 			}
 		});
+		
 		EventSubsystem->OnRespawnComplete(SpawnIndex).AddLambda([this]()
 		{
 			StartRound();

@@ -26,8 +26,8 @@ void ARewardBase::SetSpawnIndex(const int32 SpawnIndexVar)
 
 void ARewardBase::CollectReward()
 {
-	const UEntityEventSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	Subsystem->OnRewardCollected.Broadcast(GetSpawnIndex());
+	UEntityEventSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	Subsystem->OnRewardCollected(GetSpawnIndex()).Broadcast();
 
 	Destroy();
 }
