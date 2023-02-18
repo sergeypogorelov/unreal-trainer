@@ -4,6 +4,7 @@
 #include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
+#include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/PrintUtils.h"
 
 AGamePlayState::AGamePlayState()
@@ -139,34 +140,30 @@ void AGamePlayState::StopRound(const bool bIsVictorious)
 
 void AGamePlayState::SetUpEventHandlers()
 {
-	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRewardCollected.AddLambda([this](const int32 SpawnIndexVar)
+	UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
+	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this]()
 	{
-		if (GetSpawnIndex() != SpawnIndexVar)
+		UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+		EventSubsystem->OnRewardCollected.AddLambda([this](const int32 SpawnIndexVar)
 		{
-			return;
-		}
-		
-		++RewardsCollected;
+			if (GetSpawnIndex() != SpawnIndexVar)
+			{
+				return;
+			}
+			
+			++RewardsCollected;
 
-		const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
-		if (RewardsCollected == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
+			const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
+			if (RewardsCollected == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
+			{
+				StopRound(true);
+			}
+		});
+		EventSubsystem->OnRespawnComplete(SpawnIndex).AddLambda([this]()
 		{
-			StopRound(true);
-		}
-	});
-	EventSubsystem->OnRespawnComplete.AddLambda([this](const int32 SpawnIndexVar)
-	{
-		if (GetSpawnIndex() != SpawnIndexVar)
-		{
-			return;
-		}
+			StartRound();
+		});
 		
-		StartRound();
-	});
-	EventSubsystem->OnGameModeBeginPlay.AddLambda([this]()
-	{
-		const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
 		EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
 	});
 }

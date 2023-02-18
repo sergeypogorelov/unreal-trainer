@@ -5,23 +5,27 @@
 #include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
+#include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/PrintUtils.h"
 #include "Kismet/KismetMathLibrary.h"
 
 void AUnrealTrainerGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
+	SetUpEventHandlers();
+	
 	if (!TryInitConfigs()) return;
+
+	const UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
+	GlobalEventSubsystem->OnConfigsInitialized.Broadcast();
+	
 	if (!TryInitOriginTrainingArea()) return;
 	if (!TryInitOriginSpots()) return;
 	if (!TrySpawnTrainingAreas()) return;
 	if (!TrySpawnStaticEntities()) return;
 
-	SetUpEventHandlers();
-	
-	const UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EntityEventSubsystem->OnGameModeBeginPlay.Broadcast();
+	GlobalEventSubsystem->OnStaticEntitiesSpawned.Broadcast();
 }
 
 bool AUnrealTrainerGameModeBase::TryInitConfigs()
@@ -196,7 +200,7 @@ void AUnrealTrainerGameModeBase::SetUpEventHandlers()
 	{
 		if (TrySpawnDynamicEntities(SpawnIndex))
 		{
-			EntityEventSubsystem->OnRespawnComplete.Broadcast(SpawnIndex);
+			EntityEventSubsystem->OnRespawnComplete(SpawnIndex).Broadcast();
 		}
 		else
 		{
