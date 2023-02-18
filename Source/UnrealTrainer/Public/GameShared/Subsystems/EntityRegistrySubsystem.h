@@ -18,6 +18,8 @@ public:
 	TArray<AActor*> GetEntitiesByType(TEnumAsByte<EEntityTypes> EntityType) const;
 	TArray<AActor*> GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const;
 	TArray<AActor*> GetEntitiesExceptByTypes(TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const;
+	TArray<AActor*> GetEntitiesBySpawnIndexExceptByType(const int32 SpawnIndex, TEnumAsByte<EEntityTypes> EntityType) const;
+	TArray<AActor*> GetEntitiesBySpawnIndexExceptByTypes(const int32 SpawnIndex, TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const;
 	
 	void RegisterEntity(AActor* Actor);
 	void UnregisterEntity(AActor* Actor);

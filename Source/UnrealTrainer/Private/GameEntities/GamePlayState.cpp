@@ -4,6 +4,7 @@
 #include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
+#include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/PrintUtils.h"
 
 AGamePlayState::AGamePlayState()
@@ -16,6 +17,16 @@ AGamePlayState::AGamePlayState()
 TEnumAsByte<EEntityTypes> AGamePlayState::GetEntityType() const
 {
 	return State;
+}
+
+int32 AGamePlayState::GetSpawnIndex() const
+{
+	return SpawnIndex;
+}
+
+void AGamePlayState::SetSpawnIndex(const int32 SpawnIndexVar)
+{
+	SpawnIndex = SpawnIndexVar;
 }
 
 void AGamePlayState::BeginPlay()
@@ -56,8 +67,8 @@ void AGamePlayState::StartRound()
 
 	bIsRoundStarted = true;
 
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRoundStart.Broadcast();
+	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EventSubsystem->OnRoundStart(GetSpawnIndex()).Broadcast();
 	
 	SetStepTimer();
 }
@@ -70,9 +81,6 @@ void AGamePlayState::SetStepTimer()
 	const float Rate = ConfigSubsystem->GamePlaySettingsPtr->DurationOfOneStep;
 	
 	GetWorld()->GetTimerManager().SetTimer(StepTimerHandle, this, &AGamePlayState::OnStepTimerComplete, Rate);
-
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnStepStart.Broadcast();
 }
 
 void AGamePlayState::ClearStepTimer()
@@ -91,9 +99,6 @@ void AGamePlayState::ClearStepTimer()
 void AGamePlayState::OnStepTimerComplete()
 {
 	++StepsCompleted;
-	
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnStepEnd.Broadcast();
 
 	const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
 	if (StepsCompleted == ConfigSubsystem->GamePlaySettingsPtr->CountOfSteps)
@@ -119,34 +124,37 @@ void AGamePlayState::StopRound(const bool bIsVictorious)
 	
 	ClearStepTimer();
 
-	const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRoundEnd.Broadcast(bIsVictorious);
+	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EventSubsystem->OnRoundEnd(GetSpawnIndex()).Broadcast(bIsVictorious);
 
 	/// TODO: remove once trainer is implemented
 	ResetRoundState();
-	EventSubsystem->OnRespawnRequest.Broadcast();
+	EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
 }
 
 void AGamePlayState::SetUpEventHandlers()
 {
-	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRewardCollected.AddLambda([this]()
+	UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
+	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this]()
 	{
-		++RewardsCollected;
-
-		const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
-		if (RewardsCollected == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
+		UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+		
+		EventSubsystem->OnRewardCollected(GetSpawnIndex()).AddLambda([this]()
 		{
-			StopRound(true);
-		}
-	});
-	EventSubsystem->OnRespawnComplete.AddLambda([this]()
-	{
-		StartRound();
-	});
-	EventSubsystem->OnGameModeBeginPlay.AddLambda([this]()
-	{
-		const UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-		EventSubsystem->OnRespawnRequest.Broadcast();
+			++RewardsCollected;
+
+			const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
+			if (RewardsCollected == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
+			{
+				StopRound(true);
+			}
+		});
+		
+		EventSubsystem->OnRespawnComplete(SpawnIndex).AddLambda([this]()
+		{
+			StartRound();
+		});
+		
+		EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
 	});
 }

@@ -21,8 +21,18 @@ TEnumAsByte<EEntityTypes> ABotBase::GetEntityType() const
 	return Bot;
 }
 
+int32 ABotBase::GetSpawnIndex() const
+{
+	return SpawnIndex;
+}
+
+void ABotBase::SetSpawnIndex(const int32 SpawnIndexVar)
+{
+	SpawnIndex = SpawnIndexVar;
+}
+
 void ABotBase::OnSphereComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	FVector Normal, const FHitResult& HitResult)
+                                    FVector Normal, const FHitResult& HitResult)
 {
 	IGameRewardInterface* Reward = Cast<IGameRewardInterface>(OtherActor);
 	if (Reward)

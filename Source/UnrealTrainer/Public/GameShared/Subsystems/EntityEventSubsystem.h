@@ -11,14 +11,20 @@ class UNREALTRAINER_API UEntityEventSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
-	TMulticastDelegate<void()> OnGameModeBeginPlay;
-	TMulticastDelegate<void()> OnRespawnRequest;
-	TMulticastDelegate<void()> OnRespawnComplete;
-	TMulticastDelegate<void()> OnRoundStart;
-	TMulticastDelegate<void()> OnStepStart;
-	TMulticastDelegate<void()> OnStepEnd;
-	TMulticastDelegate<void()> OnRewardCollected;
-	TMulticastDelegate<void(bool)> OnRoundEnd;
+	TMulticastDelegate<void(const int32 SpawnIndex)> OnRespawnRequest;
+	
+	TMulticastDelegate<void()>& OnRespawnComplete(const int32 SpawnIndex);
+	TMulticastDelegate<void()>& OnRoundStart(const int32 SpawnIndex);
+	TMulticastDelegate<void()>& OnRewardCollected(const int32 SpawnIndex);
+	TMulticastDelegate<void(const bool bIsVictorious)>& OnRoundEnd(const int32 SpawnIndex);
 	
 	virtual void Deinitialize() override;
+private:
+	TMap<int32, TMulticastDelegate<void()>> OnRespawnCompleteMap;
+	TMap<int32, TMulticastDelegate<void()>> OnRoundStartMap;
+	TMap<int32, TMulticastDelegate<void()>> OnRewardCollectedMap;
+	TMap<int32, TMulticastDelegate<void(const bool bIsVictorious)>> OnRoundEndMap;
+
+	TMulticastDelegate<void()>& OnCommonEventWithSpawnIndex(TMap<int32, TMulticastDelegate<void()>>& Map,
+		const int32 SpawnIndex);
 };

@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
+#include "GameCore/Interfaces/GameMultiSpawnInterface.h"
 #include "GameFramework/Actor.h"
 #include "GamePlayState.generated.h"
 
 UCLASS()
-class UNREALTRAINER_API AGamePlayState : public AActor, public IGameEntityInterface
+class UNREALTRAINER_API AGamePlayState : public AActor, public IGameEntityInterface, public IGameMultiSpawnInterface
 {
 	GENERATED_BODY()
 
@@ -16,6 +17,8 @@ public:
 	AGamePlayState();
 
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
+	virtual int32 GetSpawnIndex() const override;
+	virtual void SetSpawnIndex(const int32 SpawnIndexVar) override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -24,6 +27,7 @@ private:
 	bool bIsRoundStopped;
 	int32 StepsCompleted;
 	int32 RewardsCollected;
+	int32 SpawnIndex;
 	FTimerHandle StepTimerHandle;
 
 	void ResetRoundState();

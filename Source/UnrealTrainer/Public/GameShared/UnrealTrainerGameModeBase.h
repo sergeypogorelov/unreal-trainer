@@ -46,6 +46,7 @@ private:
 	bool TryInitOriginSpots();
 	bool TrySpawnTrainingAreas();
 	bool TrySpawnStaticEntities();
-	bool TrySpawnDynamicEntities();
+	bool TrySpawnDynamicEntities(const int32 SpawnIndex);
 	void SetUpEventHandlers();
+	void ChangeTransformBySpawnIndex(FTransform& NewTransform, const FTransform& OriginTransform, const int32 SpawnIndex);
 };
