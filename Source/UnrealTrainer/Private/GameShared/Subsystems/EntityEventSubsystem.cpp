@@ -1,7 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
-
 #include "GameShared/Utils/CollectionUtils.h"
 
 TMulticastDelegate<void()>& UEntityEventSubsystem::OnRespawnComplete(const int32 SpawnIndex)
