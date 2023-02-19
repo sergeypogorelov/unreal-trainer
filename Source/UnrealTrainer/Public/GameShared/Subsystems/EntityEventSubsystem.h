@@ -24,7 +24,4 @@ private:
 	TMap<int32, TMulticastDelegate<void()>> OnRoundStartMap;
 	TMap<int32, TMulticastDelegate<void()>> OnRewardCollectedMap;
 	TMap<int32, TMulticastDelegate<void(const bool bIsVictorious)>> OnRoundEndMap;
-
-	TMulticastDelegate<void()>& OnCommonEventWithSpawnIndex(TMap<int32, TMulticastDelegate<void()>>& Map,
-		const int32 SpawnIndex);
 };

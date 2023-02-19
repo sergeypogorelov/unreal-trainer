@@ -2,49 +2,36 @@
 
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
 
+#include "GameShared/Utils/CollectionUtils.h"
+
 TMulticastDelegate<void()>& UEntityEventSubsystem::OnRespawnComplete(const int32 SpawnIndex)
 {
-	return OnCommonEventWithSpawnIndex(OnRespawnCompleteMap, SpawnIndex);
+	return UCollectionUtils::GetMapValue(OnRespawnCompleteMap, SpawnIndex);
 }
 
 TMulticastDelegate<void()>& UEntityEventSubsystem::OnRoundStart(const int32 SpawnIndex)
 {
-	return OnCommonEventWithSpawnIndex(OnRoundStartMap, SpawnIndex);
+	return UCollectionUtils::GetMapValue(OnRoundStartMap, SpawnIndex);
 }
 
 TMulticastDelegate<void()>& UEntityEventSubsystem::OnRewardCollected(const int32 SpawnIndex)
 {
-	return OnCommonEventWithSpawnIndex(OnRewardCollectedMap, SpawnIndex);
+	return UCollectionUtils::GetMapValue(OnRewardCollectedMap, SpawnIndex);
 }
 
 TMulticastDelegate<void(const bool bIsVictorious)>& UEntityEventSubsystem::OnRoundEnd(const int32 SpawnIndex)
 {
-	if (!OnRoundEndMap.Contains(SpawnIndex))
-	{
-		const TMulticastDelegate<void(const bool bIsVictorious)> Delegate;
-		OnRoundEndMap.Add(SpawnIndex, Delegate);
-	}
-
-	return OnRoundEndMap[SpawnIndex];
+	return UCollectionUtils::GetMapValue(OnRoundEndMap, SpawnIndex);
 }
 
 void UEntityEventSubsystem::Deinitialize()
 {
-	/// TODO: add others
 	OnRespawnRequest.Clear();
+
+	UCollectionUtils::ClearMapWithMulticastDelegates(OnRespawnCompleteMap);
+	UCollectionUtils::ClearMapWithMulticastDelegates(OnRoundStartMap);
+	UCollectionUtils::ClearMapWithMulticastDelegates(OnRewardCollectedMap);
+	UCollectionUtils::ClearMapWithMulticastDelegates(OnRoundEndMap);
 	
 	Super::Deinitialize();
-}
-
-TMulticastDelegate<void()>& UEntityEventSubsystem::OnCommonEventWithSpawnIndex(
-	TMap<int32, TMulticastDelegate<void()>>& Map, const int32 SpawnIndex)
-{
-	/// TODO: replace with template method
-	if (!Map.Contains(SpawnIndex))
-	{
-		const TMulticastDelegate<void()> Delegate;
-		Map.Add(SpawnIndex, Delegate);
-	}
-
-	return Map[SpawnIndex];
 }
