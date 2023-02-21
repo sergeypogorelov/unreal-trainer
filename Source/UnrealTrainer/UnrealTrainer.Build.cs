@@ -8,7 +8,10 @@ public class UnrealTrainer : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core", "CoreUObject", "Engine", "InputCore", "AIModule", "SocketIOClient", "SocketIOLib", "Json", "SIOJson"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

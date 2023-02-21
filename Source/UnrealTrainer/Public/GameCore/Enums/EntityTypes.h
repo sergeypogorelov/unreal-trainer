@@ -14,5 +14,6 @@ enum EEntityTypes
 	Spot,
 	Area,
 	Trainer,
-	State
+	State,
+	Server
 };

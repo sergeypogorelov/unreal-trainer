@@ -2,6 +2,7 @@
 
 #include "GameShared/UnrealTrainerGameModeBase.h"
 #include "GameEntities/GamePlayState.h"
+#include "GameEntities/TrainingServer.h"
 #include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
@@ -129,6 +130,8 @@ bool AUnrealTrainerGameModeBase::TrySpawnStaticEntities()
 		
 		GamePlayState->SetSpawnIndex(i);
 	}
+
+	GetWorld()->SpawnActor<ATrainingServer>();
 
 	return true;
 }
