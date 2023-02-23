@@ -17,6 +17,23 @@ void UEntityRegistrySubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
+AActor* UEntityRegistrySubsystem::GetTrainingServer() const
+{
+	TArray<AActor*> FoundActors = GetEntitiesByType(Server);
+	return FoundActors.Num() > 0 ? FoundActors[0] : nullptr;
+}
+
+AActor* UEntityRegistrySubsystem::GetBot(const int32 SpawnIndex) const
+{
+	TArray<AActor*> FoundActors = GetEntitiesByType(Bot).FilterByPredicate([SpawnIndex](AActor* Actor)
+	{
+		const IGameMultiSpawnInterface* MultiSpawnActor = Cast<IGameMultiSpawnInterface>(Actor);
+		return MultiSpawnActor->GetSpawnIndex() == SpawnIndex;
+	});
+	
+	return FoundActors.Num() > 0 ? FoundActors[0] : nullptr;
+}
+
 TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesByType(const TEnumAsByte<EEntityTypes> EntityType) const
 {
 	TArray<AActor*> FoundActors;

@@ -23,6 +23,17 @@ TMulticastDelegate<void(const bool bIsVictorious)>& UEntityEventSubsystem::OnRou
 	return UCollectionUtils::GetMapValue(OnRoundEndMap, SpawnIndex);
 }
 
+TMulticastDelegate<void(const FTrainingAction& Action)>& UEntityEventSubsystem::OnTrainingActionReceived(
+	const int32 SpawnIndex)
+{
+	return UCollectionUtils::GetMapValue(OnTrainingActionReceivedMap, SpawnIndex);
+}
+
+TMulticastDelegate<void()>& UEntityEventSubsystem::OnTrainingReset(const int32 SpawnIndex)
+{
+	return UCollectionUtils::GetMapValue(OnTrainingResetMap, SpawnIndex);
+}
+
 void UEntityEventSubsystem::Deinitialize()
 {
 	OnRespawnRequest.Clear();

@@ -2,6 +2,7 @@
 
 #include "GameShared/UnrealTrainerGameModeBase.h"
 #include "GameEntities/GamePlayState.h"
+#include "GameEntities/Trainer.h"
 #include "GameEntities/TrainingServer.h"
 #include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
@@ -122,13 +123,15 @@ bool AUnrealTrainerGameModeBase::TrySpawnStaticEntities()
 	for (int32 i = 0; i < TrainingSettings->CountOfAgents; ++i)
 	{
 		AGamePlayState* GamePlayState = GetWorld()->SpawnActor<AGamePlayState>();
+		ATrainer* Trainer = GetWorld()->SpawnActor<ATrainer>();
 		
-		if (GamePlayState == nullptr)
+		if (GamePlayState == nullptr || Trainer == nullptr)
 		{
 			return false;
 		}
 		
 		GamePlayState->SetSpawnIndex(i);
+		Trainer->SetSpawnIndex(i);
 	}
 
 	GetWorld()->SpawnActor<ATrainingServer>();
