@@ -19,6 +19,8 @@ public:
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
 	virtual int32 GetSpawnIndex() const override;
 	virtual void SetSpawnIndex(const int32 SpawnIndexVar) override;
+	void RequestForRestart();
+	void CheckForStep();
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

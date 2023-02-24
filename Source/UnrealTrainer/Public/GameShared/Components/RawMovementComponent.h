@@ -17,6 +17,12 @@ public:
 	float Speed = 100.f;
 	
 	URawMovementComponent();
-
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	bool IsFrozen() const;
+	void Freeze();
+	void Unfreeze();
+private:
+	bool bIsFrozen;
 };

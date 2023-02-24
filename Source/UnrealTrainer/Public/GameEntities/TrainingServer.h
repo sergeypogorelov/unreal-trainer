@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "SocketIOClientComponent.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
+#include "GameCore/Structs/TrainingObservations.h"
 #include "GameFramework/Actor.h"
 #include "TrainingServer.generated.h"
 
@@ -20,6 +21,7 @@ public:
 	ATrainingServer();
 
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
+	void SendObservations(const FTrainingObservations& Observation);
 protected:
 	UFUNCTION()
 	void OnServerConnected(FString SocketId, FString SessionId, bool bIsReconnection);

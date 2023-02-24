@@ -8,6 +8,16 @@ TMulticastDelegate<void()>& UEntityEventSubsystem::OnRoundStart(const int32 Spaw
 	return UCollectionUtils::GetMapValue(OnRoundStartMap, SpawnIndex);
 }
 
+TMulticastDelegate<void()>& UEntityEventSubsystem::OnStepStart(const int32 SpawnIndex)
+{
+	return UCollectionUtils::GetMapValue(OnStepStartMap, SpawnIndex);
+}
+
+TMulticastDelegate<void()>& UEntityEventSubsystem::OnStepEnd(const int32 SpawnIndex)
+{
+	return UCollectionUtils::GetMapValue(OnStepEndMap, SpawnIndex);
+}
+
 TMulticastDelegate<void()>& UEntityEventSubsystem::OnRewardCollected(const int32 SpawnIndex)
 {
 	return UCollectionUtils::GetMapValue(OnRewardCollectedMap, SpawnIndex);

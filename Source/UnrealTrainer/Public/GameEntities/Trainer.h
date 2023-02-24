@@ -18,6 +18,14 @@ class UNREALTRAINER_API ATrainer : public AActor, public IGameEntityInterface, p
 	GENERATED_BODY()
 
 public:
+	inline const static TMap<int32, FVector> ActionToDirectionMap {
+		{ 0, FVector(0, 0, 0) },
+		{ 1, FVector(0, -1, 0) },
+		{ 2, FVector(1, 0, 0) },
+		{ 3, FVector(0, 1, 0) },
+		{ 4, FVector(-1, 0, 0) },
+	};
+	
 	ATrainer();
 
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
@@ -27,10 +35,15 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
+	bool bIsServerReady;
 	int32 SpawnIndex;
-
+	float Reward;
+	TArray<float> Observations;
+	
 	TWeakObjectPtr<ATrainingServer> TrainingServerPtr;
-	TWeakObjectPtr<AGamePlayState> GamePlayState;
+	TWeakObjectPtr<AGamePlayState> GamePlayStatePtr;
 	TWeakObjectPtr<ABotBase> BotPtr;
 	TWeakObjectPtr<ABotControllerBase> BotControllerPtr;
+
+	void SendObservations(const bool bIsDone);
 };

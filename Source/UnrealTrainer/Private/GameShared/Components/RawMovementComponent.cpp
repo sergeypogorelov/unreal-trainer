@@ -9,6 +9,11 @@ URawMovementComponent::URawMovementComponent()
 
 void URawMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	if (IsFrozen())
+	{
+		return;
+	}
+	
 	if (ShouldSkipUpdate(DeltaTime))
 	{
 		return;
@@ -35,4 +40,27 @@ void URawMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	}
 	
 	UpdateComponentVelocity();
+}
+
+bool URawMovementComponent::IsFrozen() const
+{
+	return bIsFrozen;
+}
+
+void URawMovementComponent::Freeze()
+{
+	if (IsFrozen())
+	{
+		return;
+	}
+
+	bIsFrozen = true;
+}
+
+void URawMovementComponent::Unfreeze()
+{
+	if (IsFrozen())
+	{
+		bIsFrozen = false;
+	}
 }

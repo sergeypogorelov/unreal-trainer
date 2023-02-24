@@ -5,6 +5,7 @@
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/PrintUtils.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 ATrainer::ATrainer()
@@ -37,25 +38,99 @@ void ATrainer::BeginPlay()
 	UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
 	UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
 	
-	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this, RegistrySubsystem, EntityEventSubsystem, GlobalEventSubsystem]()
+	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this, RegistrySubsystem, EntityEventSubsystem]()
 	{
 		TrainingServerPtr = Cast<ATrainingServer>(RegistrySubsystem->GetTrainingServer());
-		GamePlayState = Cast<AGamePlayState>(RegistrySubsystem->GetGamePlayState(GetSpawnIndex()));
+		GamePlayStatePtr = Cast<AGamePlayState>(RegistrySubsystem->GetGamePlayState(GetSpawnIndex()));
 
-		GlobalEventSubsystem->OnDynamicEntitiesSpawned(GetSpawnIndex()).AddLambda([this, RegistrySubsystem]()
+		EntityEventSubsystem->OnRoundStart(GetSpawnIndex()).AddLambda([this, RegistrySubsystem]()
 		{
+			UPrintUtils::PrintAsWarning(TEXT("OnRoundStart"));
+			
 			BotPtr = Cast<ABotBase>(RegistrySubsystem->GetBot(GetSpawnIndex()));
 			BotControllerPtr = Cast<ABotControllerBase>(BotPtr->GetController());
 
-			UPrintUtils::PrintAsInfo(TEXT("OnRespawnComplete"));
+			if (!bIsServerReady)
+			{
+				return;
+			}
+
+			BotPtr->RawMovementComponent->Freeze();
+			SendObservations(false);
+		});
+		EntityEventSubsystem->OnStepStart(GetSpawnIndex()).AddLambda([this]()
+		{
+			UPrintUtils::PrintAsWarning(TEXT("OnStepStart"));
+			
+			if (!bIsServerReady)
+			{
+				return;
+			}
+			
+			Reward = 0;
+			Observations.Empty();
+			
+			BotPtr->RawMovementComponent->Unfreeze();
+		});
+		EntityEventSubsystem->OnRewardCollected(GetSpawnIndex()).AddLambda([this]()
+		{
+			UPrintUtils::PrintAsWarning(TEXT("OnRewardCollected"));
+			
+			if (!bIsServerReady)
+			{
+				return;
+			}
+			
+			++Reward;
+		});
+		EntityEventSubsystem->OnStepEnd(GetSpawnIndex()).AddLambda([this]()
+		{
+			UPrintUtils::PrintAsWarning(TEXT("OnStepEnd"));
+			
+			if (!bIsServerReady)
+			{
+				return;
+			}
+			
+			BotPtr->RawMovementComponent->Freeze();
+			SendObservations(false);
+		});
+		EntityEventSubsystem->OnRoundEnd(GetSpawnIndex()).AddLambda([this](const bool bIsVictorious)
+		{
+			UPrintUtils::PrintAsWarning(TEXT("OnRoundEnd"));
+			
+			if (!bIsServerReady)
+			{
+				return;
+			}
+
+			BotPtr->RawMovementComponent->Freeze();
+			SendObservations(true);
 		});
 		EntityEventSubsystem->OnTrainingActionReceived(GetSpawnIndex()).AddLambda([this](const FTrainingAction& Action)
 		{
-			UPrintUtils::PrintAsInfo(TEXT("OnTrainingActionReceived"));
+			UPrintUtils::PrintAsWarning(TEXT("OnTrainingActionReceived"));
+			
+			if (!bIsServerReady)
+			{
+				return;
+			}
+
+			BotPtr->MovementDirection = ActionToDirectionMap[Action.Action];
+			BotPtr->MovementScale = Action.Action == 0 ? 0 : 1;
+
+			GamePlayStatePtr->CheckForStep();
 		});
 		EntityEventSubsystem->OnTrainingReset(GetSpawnIndex()).AddLambda([this]()
 		{
-			UPrintUtils::PrintAsInfo(TEXT("OnTrainingReset"));
+			UPrintUtils::PrintAsWarning(TEXT("OnTrainingReset"));
+
+			if (!bIsServerReady)
+			{
+				bIsServerReady = true;
+			}
+
+			GamePlayStatePtr->RequestForRestart();
 		});
 	});
 }
@@ -66,4 +141,24 @@ void ATrainer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Subsystem->UnregisterEntity(this);
 	
 	Super::EndPlay(EndPlayReason);
+}
+
+void ATrainer::SendObservations(const bool bIsDone)
+{
+	FTrainingObservations TrainingObservation;
+
+	TrainingObservation.Done = bIsDone;
+	TrainingObservation.EnvId = GetSpawnIndex();
+	TrainingObservation.Reward = Reward;
+
+	TArray<FString> ObservationsAsStrings;
+	for (const float Value : Observations)
+	{
+		ObservationsAsStrings.Add(FString::SanitizeFloat(Value));
+	}
+	
+	FString ObservationsAsString = UKismetStringLibrary::JoinStringArray(ObservationsAsStrings, TEXT(","));
+	TrainingObservation.Observations = FString::Format(TEXT("[{0}]"), { {0, ObservationsAsString }});
+
+	TrainingServerPtr->SendObservations(TrainingObservation);
 }
