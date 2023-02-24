@@ -5,6 +5,7 @@
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/PrintUtils.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 ATrainer::ATrainer()
 {
@@ -36,12 +37,12 @@ void ATrainer::BeginPlay()
 	UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
 	UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
 	
-	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this, RegistrySubsystem, EntityEventSubsystem]()
+	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this, RegistrySubsystem, EntityEventSubsystem, GlobalEventSubsystem]()
 	{
-		
 		TrainingServerPtr = Cast<ATrainingServer>(RegistrySubsystem->GetTrainingServer());
+		GamePlayState = Cast<AGamePlayState>(RegistrySubsystem->GetGamePlayState(GetSpawnIndex()));
 
-		EntityEventSubsystem->OnRespawnComplete(GetSpawnIndex()).AddLambda([this, RegistrySubsystem]()
+		GlobalEventSubsystem->OnDynamicEntitiesSpawned(GetSpawnIndex()).AddLambda([this, RegistrySubsystem]()
 		{
 			BotPtr = Cast<ABotBase>(RegistrySubsystem->GetBot(GetSpawnIndex()));
 			BotControllerPtr = Cast<ABotControllerBase>(BotPtr->GetController());

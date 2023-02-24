@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BotBase.h"
+#include "GamePlayState.h"
 #include "TrainingServer.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
 #include "GameCore/Interfaces/GameMultiSpawnInterface.h"
@@ -27,8 +28,9 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
 	int32 SpawnIndex;
-	
+
 	TWeakObjectPtr<ATrainingServer> TrainingServerPtr;
+	TWeakObjectPtr<AGamePlayState> GamePlayState;
 	TWeakObjectPtr<ABotBase> BotPtr;
 	TWeakObjectPtr<ABotControllerBase> BotControllerPtr;
 };

@@ -16,6 +16,7 @@ public:
 	virtual void Deinitialize() override;
 
 	AActor* GetTrainingServer() const;
+	AActor* GetGamePlayState(const int32 SpawnIndex) const;
 	AActor* GetBot(const int32 SpawnIndex) const;
 	TArray<AActor*> GetEntitiesByType(TEnumAsByte<EEntityTypes> EntityType) const;
 	TArray<AActor*> GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const;
@@ -27,4 +28,5 @@ public:
 	void UnregisterEntity(AActor* Actor);
 private:
 	TMap<TEnumAsByte<EEntityTypes>, TArray<TWeakObjectPtr<AActor>>> EntityMap;
+	AActor* GetEntityBySpawnIndexAndType(const int32 SpawnIndex, const TEnumAsByte<EEntityTypes> EntityType) const;
 };

@@ -3,11 +3,6 @@
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
 #include "GameShared/Utils/CollectionUtils.h"
 
-TMulticastDelegate<void()>& UEntityEventSubsystem::OnRespawnComplete(const int32 SpawnIndex)
-{
-	return UCollectionUtils::GetMapValue(OnRespawnCompleteMap, SpawnIndex);
-}
-
 TMulticastDelegate<void()>& UEntityEventSubsystem::OnRoundStart(const int32 SpawnIndex)
 {
 	return UCollectionUtils::GetMapValue(OnRoundStartMap, SpawnIndex);
@@ -36,9 +31,6 @@ TMulticastDelegate<void()>& UEntityEventSubsystem::OnTrainingReset(const int32 S
 
 void UEntityEventSubsystem::Deinitialize()
 {
-	OnRespawnRequest.Clear();
-
-	UCollectionUtils::ClearMapWithMulticastDelegates(OnRespawnCompleteMap);
 	UCollectionUtils::ClearMapWithMulticastDelegates(OnRoundStartMap);
 	UCollectionUtils::ClearMapWithMulticastDelegates(OnRewardCollectedMap);
 	UCollectionUtils::ClearMapWithMulticastDelegates(OnRoundEndMap);

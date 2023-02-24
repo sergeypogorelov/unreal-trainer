@@ -129,13 +129,14 @@ void AGamePlayState::StopRound(const bool bIsVictorious)
 
 	/// TODO: remove once trainer is implemented
 	ResetRoundState();
-	EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
+	const UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
+	GlobalEventSubsystem->OnDynamicEntitiesSpawnRequest.Broadcast(GetSpawnIndex());
 }
 
 void AGamePlayState::SetUpEventHandlers()
 {
 	UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
-	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this]()
+	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this, GlobalEventSubsystem]()
 	{
 		UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
 		
@@ -150,11 +151,11 @@ void AGamePlayState::SetUpEventHandlers()
 			}
 		});
 		
-		EventSubsystem->OnRespawnComplete(SpawnIndex).AddLambda([this]()
+		GlobalEventSubsystem->OnDynamicEntitiesSpawned(GetSpawnIndex()).AddLambda([this]()
 		{
 			StartRound();
 		});
 		
-		EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
+		GlobalEventSubsystem->OnDynamicEntitiesSpawnRequest.Broadcast(GetSpawnIndex());
 	});
 }

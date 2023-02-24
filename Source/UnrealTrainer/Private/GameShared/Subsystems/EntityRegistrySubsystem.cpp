@@ -23,15 +23,14 @@ AActor* UEntityRegistrySubsystem::GetTrainingServer() const
 	return FoundActors.Num() > 0 ? FoundActors[0] : nullptr;
 }
 
+AActor* UEntityRegistrySubsystem::GetGamePlayState(const int32 SpawnIndex) const
+{
+	return GetEntityBySpawnIndexAndType(SpawnIndex, State);
+}
+
 AActor* UEntityRegistrySubsystem::GetBot(const int32 SpawnIndex) const
 {
-	TArray<AActor*> FoundActors = GetEntitiesByType(Bot).FilterByPredicate([SpawnIndex](AActor* Actor)
-	{
-		const IGameMultiSpawnInterface* MultiSpawnActor = Cast<IGameMultiSpawnInterface>(Actor);
-		return MultiSpawnActor->GetSpawnIndex() == SpawnIndex;
-	});
-	
-	return FoundActors.Num() > 0 ? FoundActors[0] : nullptr;
+	return GetEntityBySpawnIndexAndType(SpawnIndex, Bot);
 }
 
 TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesByType(const TEnumAsByte<EEntityTypes> EntityType) const
@@ -127,4 +126,16 @@ void UEntityRegistrySubsystem::UnregisterEntity(AActor* Actor)
 
 	const TEnumAsByte<EEntityTypes> EntityType = GameEntity->GetEntityType();
 	EntityMap[EntityType].Remove(Actor);
+}
+
+AActor* UEntityRegistrySubsystem::GetEntityBySpawnIndexAndType(const int32 SpawnIndex,
+	const TEnumAsByte<EEntityTypes> EntityType) const
+{
+	TArray<AActor*> FoundActors = GetEntitiesByType(EntityType).FilterByPredicate([SpawnIndex](AActor* Actor)
+	{
+		const IGameMultiSpawnInterface* MultiSpawnActor = Cast<IGameMultiSpawnInterface>(Actor);
+		return MultiSpawnActor->GetSpawnIndex() == SpawnIndex;
+	});
+	
+	return FoundActors.Num() > 0 ? FoundActors[0] : nullptr;
 }
