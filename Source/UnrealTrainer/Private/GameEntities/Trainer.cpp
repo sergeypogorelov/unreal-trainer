@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GameEntities/Trainer.h"
+#include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
 #include "GameShared/Subsystems/EntityEventSubsystem.h"
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameShared/Subsystems/GlobalEventSubsystem.h"
@@ -92,6 +93,7 @@ void ATrainer::BeginPlay()
 				return;
 			}
 
+			/// TODO: check weak pointers before to continue
 			BotPtr->MovementDirection = ActionToDirectionMap[Action.Action];
 			BotPtr->MovementScale = Action.Action == 0 ? 0 : 1;
 
@@ -117,6 +119,14 @@ void ATrainer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+TArray<TWeakObjectPtr<ARewardBase>> ATrainer::GetValidRewardPtrs() const
+{
+	return RewardPtrs.FilterByPredicate([](TWeakObjectPtr<ARewardBase> RewardPtr)
+	{
+		return RewardPtr.IsValid();
+	});
+}
+
 void ATrainer::SendObservations(const int32 Rewards, const bool bIsDone)
 {
 	FTrainingObservations TrainingObservation;
@@ -125,8 +135,17 @@ void ATrainer::SendObservations(const int32 Rewards, const bool bIsDone)
 	TrainingObservation.EnvId = GetSpawnIndex();
 	TrainingObservation.Reward = Rewards;
 
+	float Angle = CalcAngleToClosestReward();
+	
+	const UConfigRegistrySubsystem* ConfigRegistrySubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
+	const TWeakObjectPtr<UTrainingSettings> TrainingSettingsPtr = ConfigRegistrySubsystem->TrainingSettingsPtr;
+	if (TrainingSettingsPtr->bShouldNormalize)
+	{
+		Angle = UKismetMathLibrary::NormalizeToRange(Angle, 0, 360);
+	}
+	
 	TArray<float> Observations;
-	Observations.Add(CalcAngleToClosestReward());
+	Observations.Add(Angle);
 	
 	TArray<FString> ObservationsAsStrings;
 	for (const float& Value : Observations)
@@ -167,15 +186,17 @@ float ATrainer::CalcAngleToClosestReward() const
 {
 	const FVector BotLocation = BotPtr->GetActorLocation();
 	const FVector2D BotLocation2D = FVector2D(BotLocation.X, BotLocation.Y);
+
+	const TArray<TWeakObjectPtr<ARewardBase>> ValidRewardPtrs = GetValidRewardPtrs();
 	
 	int32 ClosetRewardIndex = 0;
-	FVector RewardLocation = RewardPtrs[ClosetRewardIndex]->GetActorLocation();
+	FVector RewardLocation = ValidRewardPtrs[ClosetRewardIndex]->GetActorLocation();
 	FVector2D RewardLocation2D = FVector2D(RewardLocation.X, RewardLocation.Y);
 	float MinDistance = UKismetMathLibrary::Distance2D(BotLocation2D, RewardLocation2D);
 	
-	for (int32 i = 1; i < RewardPtrs.Num(); ++i)
+	for (int32 i = 1; i < ValidRewardPtrs.Num(); ++i)
 	{
-		RewardLocation = RewardPtrs[i]->GetActorLocation();
+		RewardLocation = ValidRewardPtrs[i]->GetActorLocation();
 		RewardLocation2D = FVector2D(RewardLocation.X, RewardLocation.Y);
 		const float Distance = UKismetMathLibrary::Distance2D(BotLocation2D, RewardLocation2D);
 		
@@ -186,7 +207,7 @@ float ATrainer::CalcAngleToClosestReward() const
 		}
 	}
 
-	const FVector ClosestRewardLocation = RewardPtrs[ClosetRewardIndex]->GetActorLocation();
+	const FVector ClosestRewardLocation = ValidRewardPtrs[ClosetRewardIndex]->GetActorLocation();
 	const FVector2D ClosestRewardLocation2D = FVector2D(ClosestRewardLocation.X, ClosestRewardLocation.Y);
 	return UMathUtils::CalcAngleBetweenLocations(BotLocation2D, ClosestRewardLocation2D);
 }

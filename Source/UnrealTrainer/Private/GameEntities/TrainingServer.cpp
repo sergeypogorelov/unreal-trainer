@@ -36,8 +36,7 @@ void ATrainingServer::OnServerConnected(FString SocketId, FString SessionId, boo
 {
 	UPrintUtils::PrintAsInfo(TEXT("Connected"));
 
-	FTrainingLaunch Launch;
-	Launch.EnvCount = 1;
+	const FTrainingLaunch Launch = GetTrainingLaunch();
 	SocketClientComponent->EmitNative(TEXT("launchmodel"), FTrainingLaunch::StaticStruct(), &Launch);
 
 	UPrintUtils::PrintAsInfo(TEXT("Launched"));
@@ -92,4 +91,58 @@ void ATrainingServer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 	
 	Super::EndPlay(EndPlayReason);
+}
+
+FTrainingLaunch ATrainingServer::GetTrainingLaunch() const
+{
+	FTrainingLaunch TrainingLaunch;
+
+	TrainingLaunch.Algselected = TEXT("DQN");
+	TrainingLaunch.Conactionspace = false;
+	TrainingLaunch.Disactionspace = true;
+	TrainingLaunch.Actionspace = TEXT("5");
+
+	const UConfigRegistrySubsystem* ConfigRegistrySubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
+	const TWeakObjectPtr<UTrainingSettings> TrainingSettingsPtr = ConfigRegistrySubsystem->TrainingSettingsPtr;
+	
+	TrainingLaunch.EnvCount = TrainingSettingsPtr->CountOfAgents;
+	TrainingLaunch.Evalepisodes = TrainingSettingsPtr->EvalEpisodes;
+	TrainingLaunch.Loadmodel = TrainingSettingsPtr->bShouldEvaluate;
+	TrainingLaunch.Savemodel = !TrainingSettingsPtr->bShouldEvaluate;
+	TrainingLaunch.Modelname = TrainingSettingsPtr->ModelName;
+	TrainingLaunch.Layers = TrainingSettingsPtr->Layer;
+	TrainingLaunch.Lr = TrainingSettingsPtr->Lr;
+	TrainingLaunch.ExplorationRate = TrainingSettingsPtr->ExplorationRate;
+	TrainingLaunch.ExplorationRateDecay = TrainingSettingsPtr->ExplorationRateDecay;
+	TrainingLaunch.ExplorationFinal = TrainingSettingsPtr->ExplorationFinal;
+	TrainingLaunch.HistorySize = TrainingSettingsPtr->HistorySize;
+	TrainingLaunch.UpdateGameFrequncy = TrainingSettingsPtr->UpdateGameFrequency;
+	TrainingLaunch.UpdateSize = TrainingSettingsPtr->UpdateSize;
+	TrainingLaunch.RewardDiscount = TrainingSettingsPtr->RewardDiscount;
+
+	TrainingLaunch.Trainepisodes = GetTrainEpisodes();
+	TrainingLaunch.Observationspace = GetObservationSpace();
+	
+	return TrainingLaunch;
+}
+
+int32 ATrainingServer::GetTrainEpisodes() const
+{
+	const UConfigRegistrySubsystem* ConfigRegistrySubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
+	const TWeakObjectPtr<UTrainingSettings> TrainingSettingsPtr = ConfigRegistrySubsystem->TrainingSettingsPtr;
+
+	return TrainingSettingsPtr->bShouldEvaluate ? 0 : TrainingSettingsPtr->TrainEpisodes;
+}
+
+FString ATrainingServer::GetObservationSpace() const
+{
+	const UConfigRegistrySubsystem* ConfigRegistrySubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
+	const TWeakObjectPtr<UTrainingSettings> TrainingSettingsPtr = ConfigRegistrySubsystem->TrainingSettingsPtr;
+
+	if (TrainingSettingsPtr->bShouldNormalize)
+	{
+		return TEXT("low=np.array([0]), high=np.array([1]),dtype=np.float32");
+	}
+	
+	return TEXT("low=np.array([0]), high=np.array([360]),dtype=np.float32");
 }

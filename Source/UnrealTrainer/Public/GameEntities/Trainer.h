@@ -45,6 +45,7 @@ private:
 	TWeakObjectPtr<ABotControllerBase> BotControllerPtr;
 	TArray<TWeakObjectPtr<ARewardBase>> RewardPtrs;
 
+	TArray<TWeakObjectPtr<ARewardBase>> GetValidRewardPtrs() const;
 	void SendObservations(const int32 Rewards, const bool bIsDone);
 	void UpdateDynamicEntityPtrs();
 	void UpdateRewardPtrs();

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "SocketIOClientComponent.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
+#include "GameCore/Structs/TrainingLaunch.h"
 #include "GameCore/Structs/TrainingObservations.h"
 #include "GameFramework/Actor.h"
 #include "TrainingServer.generated.h"
@@ -31,4 +32,8 @@ protected:
 	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+private:
+	FTrainingLaunch GetTrainingLaunch() const;
+	int32 GetTrainEpisodes() const;
+	FString GetObservationSpace() const;
 };
