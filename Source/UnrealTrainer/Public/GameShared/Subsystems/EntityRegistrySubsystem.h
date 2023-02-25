@@ -18,7 +18,10 @@ public:
 	AActor* GetTrainingServer() const;
 	AActor* GetGamePlayState(const int32 SpawnIndex) const;
 	AActor* GetBot(const int32 SpawnIndex) const;
+	TArray<AActor*> GetRewards(const int32& SpawnIndex) const;
+	
 	TArray<AActor*> GetEntitiesByType(TEnumAsByte<EEntityTypes> EntityType) const;
+	TArray<AActor*> GetEntitiesBySpawnIndexAndType(const int32& SpawnIndex, const TEnumAsByte<EEntityTypes>& EntityType) const;
 	TArray<AActor*> GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const;
 	TArray<AActor*> GetEntitiesExceptByTypes(TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const;
 	TArray<AActor*> GetEntitiesBySpawnIndexExceptByType(const int32 SpawnIndex, TEnumAsByte<EEntityTypes> EntityType) const;

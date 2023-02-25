@@ -11,62 +11,62 @@ struct UNREALTRAINER_API FTrainingLaunch
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 EnvCount;
+	int32 EnvCount = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Algselected;
+	FString Algselected = TEXT("");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Trainepisodes;
+	int32 Trainepisodes = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Evalepisodes;
+	int32 Evalepisodes = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Conactionspace;
+	bool Conactionspace = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Disactionspace;
+	bool Disactionspace = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Actionspace;
+	FString Actionspace = TEXT("");;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Observationspace;
+	FString Observationspace = TEXT("");;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Loadmodel;
+	bool Loadmodel = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Savemodel;
+	bool Savemodel = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Modelname;
+	FString Modelname = TEXT("");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Layers;
+	FString Layers = TEXT("");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Lr;
+	float Lr = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ExplorationRate;
+	float ExplorationRate = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ExplorationRateDecay;
+	float ExplorationRateDecay = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ExplorationFinal;
+	float ExplorationFinal = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 HistorySize;
+	int32 HistorySize = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 UpdateGameFrequncy;
+	int32 UpdateGameFrequncy = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 UpdateSize;
+	int32 UpdateSize = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float RewardDiscount;
+	float RewardDiscount = 0.f;
 };

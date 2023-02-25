@@ -11,14 +11,14 @@ struct UNREALTRAINER_API FTrainingObservations
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 EnvId;
+	int32 EnvId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Reward;
+	float Reward = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Observations;
+	FString Observations = TEXT("");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Done;
+	bool Done = false;
 };

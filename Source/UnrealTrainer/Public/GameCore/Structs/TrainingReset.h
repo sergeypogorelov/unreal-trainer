@@ -11,5 +11,5 @@ struct UNREALTRAINER_API FTrainingReset
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 EnvId;
+	int32 EnvId = 0;
 };

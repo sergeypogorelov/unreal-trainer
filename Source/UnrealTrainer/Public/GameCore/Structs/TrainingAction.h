@@ -11,8 +11,8 @@ struct UNREALTRAINER_API FTrainingAction
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 EnvId;
+	int32 EnvId = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Action;
+	int32 Action = 0;
 };

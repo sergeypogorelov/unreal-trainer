@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BotBase.h"
 #include "GamePlayState.h"
+#include "RewardBase.h"
 #include "TrainingServer.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
 #include "GameCore/Interfaces/GameMultiSpawnInterface.h"
@@ -37,12 +38,15 @@ protected:
 private:
 	bool bIsServerReady;
 	int32 SpawnIndex;
-	TArray<float> Observations;
 	
 	TWeakObjectPtr<ATrainingServer> TrainingServerPtr;
 	TWeakObjectPtr<AGamePlayState> GamePlayStatePtr;
 	TWeakObjectPtr<ABotBase> BotPtr;
 	TWeakObjectPtr<ABotControllerBase> BotControllerPtr;
+	TArray<TWeakObjectPtr<ARewardBase>> RewardPtrs;
 
 	void SendObservations(const int32 Rewards, const bool bIsDone);
+	void UpdateDynamicEntityPtrs();
+	void UpdateRewardPtrs();
+	float CalcAngleToClosestReward() const;
 };
