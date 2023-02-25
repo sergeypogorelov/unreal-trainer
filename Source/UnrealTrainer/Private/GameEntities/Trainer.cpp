@@ -56,7 +56,7 @@ void ATrainer::BeginPlay()
 			}
 
 			BotPtr->RawMovementComponent->Freeze();
-			SendObservations(false);
+			SendObservations(0, false);
 		});
 		EntityEventSubsystem->OnStepStart(GetSpawnIndex()).AddLambda([this]()
 		{
@@ -67,23 +67,11 @@ void ATrainer::BeginPlay()
 				return;
 			}
 			
-			Reward = 0;
 			Observations.Empty();
 			
 			BotPtr->RawMovementComponent->Unfreeze();
 		});
-		EntityEventSubsystem->OnRewardCollected(GetSpawnIndex()).AddLambda([this]()
-		{
-			UPrintUtils::PrintAsWarning(TEXT("OnRewardCollected"));
-			
-			if (!bIsServerReady)
-			{
-				return;
-			}
-			
-			++Reward;
-		});
-		EntityEventSubsystem->OnStepEnd(GetSpawnIndex()).AddLambda([this]()
+		EntityEventSubsystem->OnStepEnd(GetSpawnIndex()).AddLambda([this](const int32 RewardsCollected)
 		{
 			UPrintUtils::PrintAsWarning(TEXT("OnStepEnd"));
 			
@@ -93,9 +81,9 @@ void ATrainer::BeginPlay()
 			}
 			
 			BotPtr->RawMovementComponent->Freeze();
-			SendObservations(false);
+			SendObservations(RewardsCollected, false);
 		});
-		EntityEventSubsystem->OnRoundEnd(GetSpawnIndex()).AddLambda([this](const bool bIsVictorious)
+		EntityEventSubsystem->OnRoundEnd(GetSpawnIndex()).AddLambda([this](const bool bIsVictorious, const int32 RewardsCollected)
 		{
 			UPrintUtils::PrintAsWarning(TEXT("OnRoundEnd"));
 			
@@ -105,7 +93,7 @@ void ATrainer::BeginPlay()
 			}
 
 			BotPtr->RawMovementComponent->Freeze();
-			SendObservations(true);
+			SendObservations(RewardsCollected, true);
 		});
 		EntityEventSubsystem->OnTrainingActionReceived(GetSpawnIndex()).AddLambda([this](const FTrainingAction& Action)
 		{
@@ -119,7 +107,7 @@ void ATrainer::BeginPlay()
 			BotPtr->MovementDirection = ActionToDirectionMap[Action.Action];
 			BotPtr->MovementScale = Action.Action == 0 ? 0 : 1;
 
-			GamePlayStatePtr->CheckForStep();
+			GamePlayStatePtr->CheckStep();
 		});
 		EntityEventSubsystem->OnTrainingReset(GetSpawnIndex()).AddLambda([this]()
 		{
@@ -143,16 +131,16 @@ void ATrainer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void ATrainer::SendObservations(const bool bIsDone)
+void ATrainer::SendObservations(const int32 Rewards, const bool bIsDone)
 {
 	FTrainingObservations TrainingObservation;
 
 	TrainingObservation.Done = bIsDone;
 	TrainingObservation.EnvId = GetSpawnIndex();
-	TrainingObservation.Reward = Reward;
+	TrainingObservation.Reward = Rewards;
 
 	TArray<FString> ObservationsAsStrings;
-	for (const float Value : Observations)
+	for (const float& Value : Observations)
 	{
 		ObservationsAsStrings.Add(FString::SanitizeFloat(Value));
 	}

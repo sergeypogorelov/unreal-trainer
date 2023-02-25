@@ -37,7 +37,6 @@ protected:
 private:
 	bool bIsServerReady;
 	int32 SpawnIndex;
-	float Reward;
 	TArray<float> Observations;
 	
 	TWeakObjectPtr<ATrainingServer> TrainingServerPtr;
@@ -45,5 +44,5 @@ private:
 	TWeakObjectPtr<ABotBase> BotPtr;
 	TWeakObjectPtr<ABotControllerBase> BotControllerPtr;
 
-	void SendObservations(const bool bIsDone);
+	void SendObservations(const int32 Rewards, const bool bIsDone);
 };

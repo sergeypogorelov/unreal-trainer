@@ -37,8 +37,13 @@ void AGamePlayState::RequestForRestart()
 	EventSubsystem->OnDynamicEntitiesSpawnRequest.Broadcast(GetSpawnIndex());
 }
 
-void AGamePlayState::CheckForStep()
+void AGamePlayState::CheckStep()
 {
+	RewardsCollected = 0;
+	
+	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EventSubsystem->OnStepStart(GetSpawnIndex()).Broadcast();
+	
 	SetStepTimer();
 }
 
@@ -68,6 +73,7 @@ void AGamePlayState::ResetRoundState()
 	bIsRoundStopped = false;
 	StepsCompleted = 0;
 	RewardsCollected = 0;
+	RewardsCollectedInTotal = 0;
 }
 
 void AGamePlayState::StartRound()
@@ -90,9 +96,6 @@ void AGamePlayState::SetStepTimer()
 	
 	const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
 	const float Rate = ConfigSubsystem->GamePlaySettingsPtr->DurationOfOneStep;
-
-	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnStepStart(GetSpawnIndex()).Broadcast();
 	
 	GetWorld()->GetTimerManager().SetTimer(StepTimerHandle, this, &AGamePlayState::OnStepTimerComplete, Rate);
 }
@@ -121,7 +124,7 @@ void AGamePlayState::OnStepTimerComplete()
 	}
 	
 	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnStepEnd(GetSpawnIndex()).Broadcast();
+	EventSubsystem->OnStepEnd(GetSpawnIndex()).Broadcast(RewardsCollected);
 }
 
 void AGamePlayState::StopRound(const bool bIsVictorious)
@@ -137,7 +140,7 @@ void AGamePlayState::StopRound(const bool bIsVictorious)
 	ClearStepTimer();
 
 	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRoundEnd(GetSpawnIndex()).Broadcast(bIsVictorious);
+	EventSubsystem->OnRoundEnd(GetSpawnIndex()).Broadcast(bIsVictorious, RewardsCollected);
 }
 
 void AGamePlayState::SetUpEventHandlers()
@@ -149,11 +152,11 @@ void AGamePlayState::SetUpEventHandlers()
 		
 		EventSubsystem->OnRewardCollected(GetSpawnIndex()).AddLambda([this]()
 		{
-			/// TODO: sometimes reward is not sent to the server
 			++RewardsCollected;
+			++RewardsCollectedInTotal;
 
 			const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
-			if (RewardsCollected == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
+			if (RewardsCollectedInTotal == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
 			{
 				StopRound(true);
 			}
