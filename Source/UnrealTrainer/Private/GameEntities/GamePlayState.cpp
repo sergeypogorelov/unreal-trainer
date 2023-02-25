@@ -121,6 +121,7 @@ void AGamePlayState::OnStepTimerComplete()
 	if (StepsCompleted == ConfigSubsystem->GamePlaySettingsPtr->CountOfSteps)
 	{
 		StopRound(false);
+		return;
 	}
 	
 	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();

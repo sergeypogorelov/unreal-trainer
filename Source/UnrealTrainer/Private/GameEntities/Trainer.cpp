@@ -6,6 +6,7 @@
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/MathUtils.h"
+#include "GameShared/Utils/PrintUtils.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -54,6 +55,12 @@ void ATrainer::BeginPlay()
 				return;
 			}
 
+			if (!BotPtr.IsValid())
+			{
+				UPrintUtils::PrintAsError(TEXT("On round start the bot is not valid"));
+				return;
+			}
+			
 			BotPtr->RawMovementComponent->Freeze();
 			SendObservations(0, false);
 		});
@@ -63,6 +70,12 @@ void ATrainer::BeginPlay()
 			{
 				return;
 			}
+
+			if (!BotPtr.IsValid())
+			{
+				UPrintUtils::PrintAsError(TEXT("On step start the bot is not valid"));
+				return;
+			}
 			
 			BotPtr->RawMovementComponent->Unfreeze();
 		});
@@ -70,6 +83,12 @@ void ATrainer::BeginPlay()
 		{
 			if (!bIsServerReady)
 			{
+				return;
+			}
+
+			if (!BotPtr.IsValid())
+			{
+				UPrintUtils::PrintAsError(TEXT("On step end the bot is not valid"));
 				return;
 			}
 			
@@ -83,6 +102,12 @@ void ATrainer::BeginPlay()
 				return;
 			}
 
+			if (!BotPtr.IsValid())
+			{
+				UPrintUtils::PrintAsError(TEXT("On round end the bot is not valid"));
+				return;
+			}
+			
 			BotPtr->RawMovementComponent->Freeze();
 			SendObservations(RewardsCollected, true);
 		});
@@ -93,10 +118,21 @@ void ATrainer::BeginPlay()
 				return;
 			}
 
-			/// TODO: check weak pointers before to continue
+			if (!BotPtr.IsValid())
+			{
+				UPrintUtils::PrintAsError(TEXT("Not possible to set action as the bot is not valid"));
+				return;
+			}
+			
 			BotPtr->MovementDirection = ActionToDirectionMap[Action.Action];
 			BotPtr->MovementScale = Action.Action == 0 ? 0 : 1;
 
+			if (!GamePlayStatePtr.IsValid())
+			{
+				UPrintUtils::PrintAsError(TEXT("Not possible to check step as game play state is not valid"));
+				return;
+			}
+			
 			GamePlayStatePtr->CheckStep();
 		});
 		EntityEventSubsystem->OnTrainingReset(GetSpawnIndex()).AddLambda([this]()
@@ -106,6 +142,12 @@ void ATrainer::BeginPlay()
 				bIsServerReady = true;
 			}
 
+			if (!GamePlayStatePtr.IsValid())
+			{
+				UPrintUtils::PrintAsError(TEXT("Not possible to request for restart as game play state is not valid"));
+				return;
+			}
+			
 			GamePlayStatePtr->RequestForRestart();
 		});
 	});
@@ -156,6 +198,12 @@ void ATrainer::SendObservations(const int32 Rewards, const bool bIsDone)
 	FString ObservationsAsString = UKismetStringLibrary::JoinStringArray(ObservationsAsStrings, TEXT(","));
 	TrainingObservation.Observations = FString::Format(TEXT("[{0}]"), { ObservationsAsString });
 
+	if (!TrainingServerPtr.IsValid())
+	{
+		UPrintUtils::PrintAsError(TEXT("Not possible to send observations as training server is not valid"));
+		return;
+	}
+	
 	TrainingServerPtr->SendObservations(TrainingObservation);
 }
 
