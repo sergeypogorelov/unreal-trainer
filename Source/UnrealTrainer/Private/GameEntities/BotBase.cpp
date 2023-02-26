@@ -31,6 +31,13 @@ void ABotBase::SetSpawnIndex(const int32 SpawnIndexVar)
 	SpawnIndex = SpawnIndexVar;
 }
 
+void ABotBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	AddMovementInput(MovementDirection, MovementScale);
+}
+
 void ABotBase::OnSphereComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
                                     FVector Normal, const FHitResult& HitResult)
 {

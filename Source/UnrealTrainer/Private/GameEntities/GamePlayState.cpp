@@ -29,6 +29,24 @@ void AGamePlayState::SetSpawnIndex(const int32 SpawnIndexVar)
 	SpawnIndex = SpawnIndexVar;
 }
 
+void AGamePlayState::RequestForRestart()
+{
+	ResetRoundState();
+
+	const UGlobalEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
+	EventSubsystem->OnDynamicEntitiesSpawnRequest.Broadcast(GetSpawnIndex());
+}
+
+void AGamePlayState::CheckStep()
+{
+	RewardsCollected = 0;
+	
+	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EventSubsystem->OnStepStart(GetSpawnIndex()).Broadcast();
+	
+	SetStepTimer();
+}
+
 void AGamePlayState::BeginPlay()
 {
 	Super::BeginPlay();
@@ -55,6 +73,7 @@ void AGamePlayState::ResetRoundState()
 	bIsRoundStopped = false;
 	StepsCompleted = 0;
 	RewardsCollected = 0;
+	RewardsCollectedInTotal = 0;
 }
 
 void AGamePlayState::StartRound()
@@ -69,8 +88,6 @@ void AGamePlayState::StartRound()
 
 	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
 	EventSubsystem->OnRoundStart(GetSpawnIndex()).Broadcast();
-	
-	SetStepTimer();
 }
 
 void AGamePlayState::SetStepTimer()
@@ -104,12 +121,11 @@ void AGamePlayState::OnStepTimerComplete()
 	if (StepsCompleted == ConfigSubsystem->GamePlaySettingsPtr->CountOfSteps)
 	{
 		StopRound(false);
+		return;
 	}
-	else
-	{
-		/// TODO: remove once trainer is implemented
-		SetStepTimer();
-	}
+	
+	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
+	EventSubsystem->OnStepEnd(GetSpawnIndex()).Broadcast(RewardsCollected);
 }
 
 void AGamePlayState::StopRound(const bool bIsVictorious)
@@ -125,36 +141,33 @@ void AGamePlayState::StopRound(const bool bIsVictorious)
 	ClearStepTimer();
 
 	UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EventSubsystem->OnRoundEnd(GetSpawnIndex()).Broadcast(bIsVictorious);
-
-	/// TODO: remove once trainer is implemented
-	ResetRoundState();
-	EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
+	EventSubsystem->OnRoundEnd(GetSpawnIndex()).Broadcast(bIsVictorious, RewardsCollected);
 }
 
 void AGamePlayState::SetUpEventHandlers()
 {
 	UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
-	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this]()
+	GlobalEventSubsystem->OnStaticEntitiesSpawned.AddLambda([this, GlobalEventSubsystem]()
 	{
 		UEntityEventSubsystem* EventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
 		
 		EventSubsystem->OnRewardCollected(GetSpawnIndex()).AddLambda([this]()
 		{
 			++RewardsCollected;
+			++RewardsCollectedInTotal;
 
 			const UConfigRegistrySubsystem* ConfigSubsystem = GetGameInstance()->GetSubsystem<UConfigRegistrySubsystem>();
-			if (RewardsCollected == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
+			if (RewardsCollectedInTotal == ConfigSubsystem->GamePlaySettingsPtr->CountOfRewardsToSpawn)
 			{
 				StopRound(true);
 			}
 		});
 		
-		EventSubsystem->OnRespawnComplete(SpawnIndex).AddLambda([this]()
+		GlobalEventSubsystem->OnDynamicEntitiesSpawned(GetSpawnIndex()).AddLambda([this]()
 		{
 			StartRound();
 		});
 		
-		EventSubsystem->OnRespawnRequest.Broadcast(GetSpawnIndex());
+		GlobalEventSubsystem->OnDynamicEntitiesSpawnRequest.Broadcast(GetSpawnIndex());
 	});
 }

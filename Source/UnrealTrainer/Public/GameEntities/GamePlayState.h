@@ -19,6 +19,8 @@ public:
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
 	virtual int32 GetSpawnIndex() const override;
 	virtual void SetSpawnIndex(const int32 SpawnIndexVar) override;
+	void RequestForRestart();
+	void CheckStep();
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -27,6 +29,7 @@ private:
 	bool bIsRoundStopped;
 	int32 StepsCompleted;
 	int32 RewardsCollected;
+	int32 RewardsCollectedInTotal;
 	int32 SpawnIndex;
 	FTimerHandle StepTimerHandle;
 

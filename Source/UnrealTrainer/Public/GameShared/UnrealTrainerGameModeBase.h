@@ -34,8 +34,8 @@ public:
 
 	virtual void BeginPlay() override;
 private:
-	float OriginTrainingAreaLengthOnX = 0.f;
-	float OriginTrainingAreaLengthOnY = 0.f;
+	float OriginTrainingAreaLengthOnX;
+	float OriginTrainingAreaLengthOnY;
 	FTransform OriginTrainingAreaTransform;
 	TWeakObjectPtr<ATrainingAreaBase> OriginTrainingAreaPtr;
 

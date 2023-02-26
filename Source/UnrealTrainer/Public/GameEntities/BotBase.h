@@ -21,12 +21,16 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	URawMovementComponent* RawMovementComponent;
+
+	FVector MovementDirection;
+	float MovementScale;
 	
 	ABotBase();
 	
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
 	virtual int32 GetSpawnIndex() const override;
 	virtual void SetSpawnIndex(const int32 SpawnIndexVar) override;
+	virtual void Tick(float DeltaSeconds) override;
 protected:
 	UFUNCTION()
 	void OnSphereComponentHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,

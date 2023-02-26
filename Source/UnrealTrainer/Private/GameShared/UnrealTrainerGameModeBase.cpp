@@ -2,8 +2,9 @@
 
 #include "GameShared/UnrealTrainerGameModeBase.h"
 #include "GameEntities/GamePlayState.h"
+#include "GameEntities/Trainer.h"
+#include "GameEntities/TrainingServer.h"
 #include "GameShared/Subsystems/ConfigRegistrySubsystem.h"
-#include "GameShared/Subsystems/EntityEventSubsystem.h"
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/PrintUtils.h"
@@ -121,14 +122,18 @@ bool AUnrealTrainerGameModeBase::TrySpawnStaticEntities()
 	for (int32 i = 0; i < TrainingSettings->CountOfAgents; ++i)
 	{
 		AGamePlayState* GamePlayState = GetWorld()->SpawnActor<AGamePlayState>();
+		ATrainer* Trainer = GetWorld()->SpawnActor<ATrainer>();
 		
-		if (GamePlayState == nullptr)
+		if (GamePlayState == nullptr || Trainer == nullptr)
 		{
 			return false;
 		}
 		
 		GamePlayState->SetSpawnIndex(i);
+		Trainer->SetSpawnIndex(i);
 	}
+
+	GetWorld()->SpawnActor<ATrainingServer>();
 
 	return true;
 }
@@ -154,7 +159,8 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32 SpawnIndex)
 	}
 	
 	const UEntityRegistrySubsystem* RegistrySubsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
-	const TArray<AActor*> RegisteredEntities = RegistrySubsystem->GetEntitiesBySpawnIndexExceptByTypes(SpawnIndex, { Area, State });
+	/// TODO: get rid of this kind of methods
+	const TArray<AActor*> RegisteredEntities = RegistrySubsystem->GetEntitiesBySpawnIndexExceptByTypes(SpawnIndex, { Area, State, Trainer });
 	for (AActor* Entity : RegisteredEntities)
 	{
 		Entity->Destroy();
@@ -195,12 +201,12 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32 SpawnIndex)
 
 void AUnrealTrainerGameModeBase::SetUpEventHandlers()
 {
-	UEntityEventSubsystem* EntityEventSubsystem = GetGameInstance()->GetSubsystem<UEntityEventSubsystem>();
-	EntityEventSubsystem->OnRespawnRequest.AddLambda([this, EntityEventSubsystem](const int32 SpawnIndex)
+	UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
+	GlobalEventSubsystem->OnDynamicEntitiesSpawnRequest.AddLambda([this, GlobalEventSubsystem](const int32 SpawnIndex)
 	{
 		if (TrySpawnDynamicEntities(SpawnIndex))
 		{
-			EntityEventSubsystem->OnRespawnComplete(SpawnIndex).Broadcast();
+			GlobalEventSubsystem->OnDynamicEntitiesSpawned(SpawnIndex).Broadcast();
 		}
 		else
 		{
