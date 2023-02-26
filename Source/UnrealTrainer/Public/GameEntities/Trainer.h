@@ -10,7 +10,6 @@
 #include "GameCore/Interfaces/GameEntityInterface.h"
 #include "GameCore/Interfaces/GameMultiSpawnInterface.h"
 #include "GameFramework/Actor.h"
-#include "GameShared/BotControllerBase.h"
 #include "Trainer.generated.h"
 
 UCLASS()
@@ -42,7 +41,6 @@ private:
 	TWeakObjectPtr<ATrainingServer> TrainingServerPtr;
 	TWeakObjectPtr<AGamePlayState> GamePlayStatePtr;
 	TWeakObjectPtr<ABotBase> BotPtr;
-	TWeakObjectPtr<ABotControllerBase> BotControllerPtr;
 	TArray<TWeakObjectPtr<ARewardBase>> RewardPtrs;
 
 	TArray<TWeakObjectPtr<ARewardBase>> GetValidRewardPtrs() const;

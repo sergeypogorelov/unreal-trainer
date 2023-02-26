@@ -212,7 +212,6 @@ void ATrainer::UpdateDynamicEntityPtrs()
 	const UEntityRegistrySubsystem* RegistrySubsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
 	
 	BotPtr = Cast<ABotBase>(RegistrySubsystem->GetBot(GetSpawnIndex()));
-	BotControllerPtr = Cast<ABotControllerBase>(BotPtr->GetController());
 
 	UpdateRewardPtrs();
 }

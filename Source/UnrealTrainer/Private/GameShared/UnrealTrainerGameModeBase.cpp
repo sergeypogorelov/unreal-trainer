@@ -159,8 +159,7 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32 SpawnIndex)
 	}
 	
 	const UEntityRegistrySubsystem* RegistrySubsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
-	/// TODO: get rid of this kind of methods
-	const TArray<AActor*> RegisteredEntities = RegistrySubsystem->GetEntitiesBySpawnIndexExceptByTypes(SpawnIndex, { Area, State, Trainer });
+	const TArray<AActor*> RegisteredEntities = RegistrySubsystem->GetEntitiesBySpawnIndexAndTypes(SpawnIndex, { Bot, Reward });
 	for (AActor* Entity : RegisteredEntities)
 	{
 		Entity->Destroy();
