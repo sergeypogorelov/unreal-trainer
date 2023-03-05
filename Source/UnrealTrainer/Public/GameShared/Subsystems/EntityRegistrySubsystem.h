@@ -19,7 +19,8 @@ public:
 	AActor* GetGamePlayState(const int32& SpawnIndex) const;
 	AActor* GetBot(const int32& SpawnIndex) const;
 	TArray<AActor*> GetRewards(const int32& SpawnIndex) const;
-	
+
+	AActor* GetEntityByType(const TEnumAsByte<EEntityTypes>& EntityType) const;
 	AActor* GetEntityBySpawnIndexAndType(const int32& SpawnIndex, const TEnumAsByte<EEntityTypes>& EntityType) const;
 	TArray<AActor*> GetEntitiesByType(const TEnumAsByte<EEntityTypes>& EntityType) const;
 	TArray<AActor*> GetEntitiesByTypes(const TArray<TEnumAsByte<EEntityTypes>>& EntityTypes) const;
@@ -29,5 +30,5 @@ public:
 	void RegisterEntity(AActor* Actor);
 	void UnregisterEntity(AActor* Actor);
 private:
-	TMap<TEnumAsByte<EEntityTypes>, TArray<TWeakObjectPtr<AActor>>> EntityMap;
+	TMap<int32, TArray<TWeakObjectPtr<AActor>>> EntityMap;
 };

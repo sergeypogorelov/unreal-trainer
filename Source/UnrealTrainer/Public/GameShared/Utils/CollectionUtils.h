@@ -22,6 +22,19 @@ public:
 
 		return Map[Key];
 	}
+
+	template <typename KeyType, typename ValType>
+	static void SetMapValue(TMap<KeyType, ValType>& Map, const KeyType& Key, const ValType& Value)
+	{
+		if (Map.Contains(Key))
+		{
+			Map[Key] = Value;
+		}
+		else
+		{
+			Map.Add(Value);
+		}
+	}
 	
 	template <typename KeyType, typename DelegateSignature>
 	static void ClearMapWithMulticastDelegates(TMap<KeyType, TMulticastDelegate<DelegateSignature>>& Map)

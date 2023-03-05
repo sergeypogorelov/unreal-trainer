@@ -8,6 +8,7 @@
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/PrintUtils.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 void AUnrealTrainerGameModeBase::BeginPlay()
@@ -121,8 +122,8 @@ bool AUnrealTrainerGameModeBase::TrySpawnStaticEntities()
 {
 	for (int32 i = 0; i < TrainingSettings->CountOfAgents; ++i)
 	{
-		AGamePlayState* GamePlayState = GetWorld()->SpawnActor<AGamePlayState>();
-		ATrainer* Trainer = GetWorld()->SpawnActor<ATrainer>();
+		AGamePlayState* GamePlayState = GetWorld()->SpawnActorDeferred<AGamePlayState>(AGamePlayState::StaticClass(), FTransform());
+		ATrainer* Trainer = GetWorld()->SpawnActorDeferred<ATrainer>(ATrainer::StaticClass(), FTransform());
 		
 		if (GamePlayState == nullptr || Trainer == nullptr)
 		{
@@ -131,6 +132,9 @@ bool AUnrealTrainerGameModeBase::TrySpawnStaticEntities()
 		
 		GamePlayState->SetSpawnIndex(i);
 		Trainer->SetSpawnIndex(i);
+
+		UGameplayStatics::FinishSpawningActor(GamePlayState, FTransform());
+		UGameplayStatics::FinishSpawningActor(Trainer, FTransform());
 	}
 
 	GetWorld()->SpawnActor<ATrainingServer>();
@@ -165,7 +169,6 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32 SpawnIndex)
 		Entity->Destroy();
 	}
 
-	TArray<AActor*> SpawnedActors;
 	TArray<FTransform> SpotTransforms = OriginSpotTransforms;
 	if (GamePlaySettings->bShouldRandomize)
 	{
@@ -180,20 +183,16 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32 SpawnIndex)
 	{
 		FTransform NewTransform;
 		ChangeTransformBySpawnIndex(NewTransform, SpotTransforms[Index], SpawnIndex);
-		AActor* SpawnedActor = GetWorld()->SpawnActor(RewardClass, &NewTransform);
-		SpawnedActors.Add(SpawnedActor);
+		ARewardBase* SpawnedReward = GetWorld()->SpawnActorDeferred<ARewardBase>(RewardClass, NewTransform);
+		SpawnedReward->SetSpawnIndex(SpawnIndex);
+		UGameplayStatics::FinishSpawningActor(SpawnedReward, NewTransform);
 	}
 
 	FTransform NewTransform;
 	ChangeTransformBySpawnIndex(NewTransform, SpotTransforms[Index], SpawnIndex);
-	AActor* SpawnedActor = GetWorld()->SpawnActor(BotClass, &NewTransform);
-	SpawnedActors.Add(SpawnedActor);
-
-	for (AActor* Actor : SpawnedActors)
-	{
-		IGameMultiSpawnInterface* MultiSpawnActor = Cast<IGameMultiSpawnInterface>(Actor);
-		MultiSpawnActor->SetSpawnIndex(SpawnIndex);
-	}
+	ABotBase* SpawnedBot = GetWorld()->SpawnActorDeferred<ABotBase>(BotClass, NewTransform);
+	SpawnedBot->SetSpawnIndex(SpawnIndex);
+	UGameplayStatics::FinishSpawningActor(SpawnedBot, NewTransform);
 	
 	return true;
 }
