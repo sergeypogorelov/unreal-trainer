@@ -7,11 +7,10 @@
 #include "GameCore/Interfaces/GameEntityInterface.h"
 #include "GameCore/Structs/TrainingLaunch.h"
 #include "GameCore/Structs/TrainingObservations.h"
-#include "GameFramework/Actor.h"
 #include "TrainingServer.generated.h"
 
 UCLASS()
-class UNREALTRAINER_API ATrainingServer : public AActor, public IGameEntityInterface
+class UNREALTRAINER_API ATrainingServer : public AInfo, public IGameEntityInterface
 {
 	GENERATED_BODY()
 

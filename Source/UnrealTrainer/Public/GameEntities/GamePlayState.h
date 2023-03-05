@@ -5,11 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
 #include "GameCore/Interfaces/GameMultiSpawnInterface.h"
-#include "GameFramework/Actor.h"
 #include "GamePlayState.generated.h"
 
 UCLASS()
-class UNREALTRAINER_API AGamePlayState : public AActor, public IGameEntityInterface, public IGameMultiSpawnInterface
+class UNREALTRAINER_API AGamePlayState : public AInfo, public IGameEntityInterface, public IGameMultiSpawnInterface
 {
 	GENERATED_BODY()
 
