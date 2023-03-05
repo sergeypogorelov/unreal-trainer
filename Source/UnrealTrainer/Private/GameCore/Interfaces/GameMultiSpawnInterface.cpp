@@ -7,7 +7,7 @@ int32 IGameMultiSpawnInterface::GetSpawnIndex() const
 	return 0;
 }
 
-void IGameMultiSpawnInterface::SetSpawnIndex(const int32 SpawnIndex)
+void IGameMultiSpawnInterface::SetSpawnIndex(const int32& SpawnIndex)
 {
 	/// nothing by default
 }

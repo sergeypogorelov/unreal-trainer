@@ -12,21 +12,21 @@ class UNREALTRAINER_API UEntityEventSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
-	TMulticastDelegate<void()>& OnRoundStart(const int32 SpawnIndex);
-	TMulticastDelegate<void()>& OnStepStart(const int32 SpawnIndex);
-	TMulticastDelegate<void(const int32 RewardsCollected)>& OnStepEnd(const int32 SpawnIndex);
-	TMulticastDelegate<void()>& OnRewardCollected(const int32 SpawnIndex);
-	TMulticastDelegate<void(const bool bIsVictorious, const int32 RewardsCollected)>& OnRoundEnd(const int32 SpawnIndex);
-	TMulticastDelegate<void(const FTrainingAction& Action)>& OnTrainingActionReceived(const int32 SpawnIndex);
-	TMulticastDelegate<void()>& OnTrainingReset(const int32 SpawnIndex);
+	TMulticastDelegate<void()>& OnRoundStart(const int32& SpawnIndex);
+	TMulticastDelegate<void()>& OnStepStart(const int32& SpawnIndex);
+	TMulticastDelegate<void(const int32& RewardsCollected)>& OnStepEnd(const int32& SpawnIndex);
+	TMulticastDelegate<void()>& OnRewardCollected(const int32& SpawnIndex);
+	TMulticastDelegate<void(const bool& bIsVictorious, const int32& RewardsCollected)>& OnRoundEnd(const int32& SpawnIndex);
+	TMulticastDelegate<void(const FTrainingAction& Action)>& OnTrainingActionReceived(const int32& SpawnIndex);
+	TMulticastDelegate<void()>& OnTrainingReset(const int32& SpawnIndex);
 	
 	virtual void Deinitialize() override;
 private:
 	TMap<int32, TMulticastDelegate<void()>> OnRoundStartMap;
 	TMap<int32, TMulticastDelegate<void()>> OnStepStartMap;
-	TMap<int32, TMulticastDelegate<void(const int32 RewardsCollected)>> OnStepEndMap;
+	TMap<int32, TMulticastDelegate<void(const int32& RewardsCollected)>> OnStepEndMap;
 	TMap<int32, TMulticastDelegate<void()>> OnRewardCollectedMap;
-	TMap<int32, TMulticastDelegate<void(const bool bIsVictorious, const int32 RewardsCollected)>> OnRoundEndMap;
+	TMap<int32, TMulticastDelegate<void(const bool& bIsVictorious, const int32& RewardsCollected)>> OnRoundEndMap;
 	TMap<int32, TMulticastDelegate<void(const FTrainingAction& Action)>> OnTrainingActionReceivedMap;
 	TMap<int32, TMulticastDelegate<void()>> OnTrainingResetMap;
 };

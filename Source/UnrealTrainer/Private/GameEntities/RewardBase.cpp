@@ -19,7 +19,7 @@ int32 ARewardBase::GetSpawnIndex() const
 	return SpawnIndex;
 }
 
-void ARewardBase::SetSpawnIndex(const int32 SpawnIndexVar)
+void ARewardBase::SetSpawnIndex(const int32& SpawnIndexVar)
 {
 	SpawnIndex = SpawnIndexVar;
 }

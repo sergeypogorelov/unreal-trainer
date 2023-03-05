@@ -26,7 +26,7 @@ int32 ABotBase::GetSpawnIndex() const
 	return SpawnIndex;
 }
 
-void ABotBase::SetSpawnIndex(const int32 SpawnIndexVar)
+void ABotBase::SetSpawnIndex(const int32& SpawnIndexVar)
 {
 	SpawnIndex = SpawnIndexVar;
 }

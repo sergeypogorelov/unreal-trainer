@@ -18,5 +18,5 @@ class UNREALTRAINER_API IGameMultiSpawnInterface
 
 public:
 	virtual int32 GetSpawnIndex() const;
-	virtual void SetSpawnIndex(const int32 SpawnIndex);
+	virtual void SetSpawnIndex(const int32& SpawnIndex);
 };

@@ -12,7 +12,7 @@ class UNREALTRAINER_API UCollectionUtils : public UBlueprintFunctionLibrary
 
 public:
 	template <typename KeyType, typename ValType>
-	static ValType& GetMapValue(TMap<KeyType, ValType>& Map, const KeyType Key)
+	static ValType& GetMapValue(TMap<KeyType, ValType>& Map, const KeyType& Key)
 	{
 		if (!Map.Contains(Key))
 		{

@@ -29,7 +29,7 @@ public:
 
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
 	virtual int32 GetSpawnIndex() const override;
-	virtual void SetSpawnIndex(const int32 SpawnIndexVar) override;
+	virtual void SetSpawnIndex(const int32& SpawnIndexVar) override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -43,7 +43,7 @@ private:
 	TArray<TWeakObjectPtr<ARewardBase>> RewardPtrs;
 
 	TArray<TWeakObjectPtr<ARewardBase>> GetValidRewardPtrs() const;
-	void SendObservations(const int32 Rewards, const bool bIsDone);
+	void SendObservations(const int32& Rewards, const bool& bIsDone);
 	void UpdateDynamicEntityPtrs();
 	void UpdateRewardPtrs();
 	float CalcAngleToClosestReward() const;

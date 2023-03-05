@@ -13,9 +13,9 @@ class UNREALTRAINER_API UGlobalEventSubsystem : public UGameInstanceSubsystem
 public:
 	TMulticastDelegate<void()> OnConfigsInitialized;
 	TMulticastDelegate<void()> OnStaticEntitiesSpawned;
-	TMulticastDelegate<void(const int32 SpawnIndex)> OnDynamicEntitiesSpawnRequest;
+	TMulticastDelegate<void(const int32& SpawnIndex)> OnDynamicEntitiesSpawnRequest;
 	
-	TMulticastDelegate<void()>& OnDynamicEntitiesSpawned(const int32 SpawnIndex);
+	TMulticastDelegate<void()>& OnDynamicEntitiesSpawned(const int32& SpawnIndex);
 
 	virtual void Deinitialize() override;
 private:

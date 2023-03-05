@@ -142,7 +142,7 @@ bool AUnrealTrainerGameModeBase::TrySpawnStaticEntities()
 	return true;
 }
 
-bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32 SpawnIndex)
+bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32& SpawnIndex)
 {
 	if (BotClass == nullptr)
 	{
@@ -200,7 +200,7 @@ bool AUnrealTrainerGameModeBase::TrySpawnDynamicEntities(const int32 SpawnIndex)
 void AUnrealTrainerGameModeBase::SetUpEventHandlers()
 {
 	UGlobalEventSubsystem* GlobalEventSubsystem = GetGameInstance()->GetSubsystem<UGlobalEventSubsystem>();
-	GlobalEventSubsystem->OnDynamicEntitiesSpawnRequest.AddLambda([this, GlobalEventSubsystem](const int32 SpawnIndex)
+	GlobalEventSubsystem->OnDynamicEntitiesSpawnRequest.AddLambda([this, GlobalEventSubsystem](const int32& SpawnIndex)
 	{
 		if (TrySpawnDynamicEntities(SpawnIndex))
 		{
@@ -214,7 +214,7 @@ void AUnrealTrainerGameModeBase::SetUpEventHandlers()
 }
 
 void AUnrealTrainerGameModeBase::ChangeTransformBySpawnIndex(FTransform& NewTransform, const FTransform& OriginTransform,
-	const int32 SpawnIndex)
+	const int32& SpawnIndex)
 {
 	NewTransform = OriginTransform;
 	FVector NewLocation(OriginTransform.GetLocation());

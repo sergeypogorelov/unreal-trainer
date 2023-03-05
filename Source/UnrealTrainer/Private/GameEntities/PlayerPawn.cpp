@@ -22,6 +22,7 @@ void APlayerPawn::BeginPlay()
 	Subsystem->RegisterEntity(this);
 	
 	GetCollisionComponent()->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+	GetMeshComponent()->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 }
 
 void APlayerPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
