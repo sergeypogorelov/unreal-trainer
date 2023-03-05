@@ -24,7 +24,7 @@ int32 AGamePlayState::GetSpawnIndex() const
 	return SpawnIndex;
 }
 
-void AGamePlayState::SetSpawnIndex(const int32 SpawnIndexVar)
+void AGamePlayState::SetSpawnIndex(const int32& SpawnIndexVar)
 {
 	SpawnIndex = SpawnIndexVar;
 }

@@ -87,7 +87,8 @@ void ATrainingServer::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		SocketClientComponent->UnbindEvent(TEXT("reset"));
 		SocketClientComponent->UnbindEvent(TEXT("sendaction"));
-		SocketClientComponent->Disconnect();
+		/// TODO: find out why socket exception is thrown sometimes
+		/// SocketClientComponent->Disconnect();
 	}
 	
 	Super::EndPlay(EndPlayReason);

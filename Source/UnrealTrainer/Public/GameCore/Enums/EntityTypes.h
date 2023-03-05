@@ -15,5 +15,6 @@ enum EEntityTypes
 	Area,
 	Trainer,
 	State,
-	Server
+	Server,
+	Player
 };

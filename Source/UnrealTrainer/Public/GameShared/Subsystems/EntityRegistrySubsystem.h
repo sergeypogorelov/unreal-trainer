@@ -16,20 +16,19 @@ public:
 	virtual void Deinitialize() override;
 
 	AActor* GetTrainingServer() const;
-	AActor* GetGamePlayState(const int32 SpawnIndex) const;
-	AActor* GetBot(const int32 SpawnIndex) const;
+	AActor* GetGamePlayState(const int32& SpawnIndex) const;
+	AActor* GetBot(const int32& SpawnIndex) const;
 	TArray<AActor*> GetRewards(const int32& SpawnIndex) const;
-	
-	TArray<AActor*> GetEntitiesByType(TEnumAsByte<EEntityTypes> EntityType) const;
+
+	AActor* GetEntityByType(const TEnumAsByte<EEntityTypes>& EntityType) const;
+	AActor* GetEntityBySpawnIndexAndType(const int32& SpawnIndex, const TEnumAsByte<EEntityTypes>& EntityType) const;
+	TArray<AActor*> GetEntitiesByType(const TEnumAsByte<EEntityTypes>& EntityType) const;
+	TArray<AActor*> GetEntitiesByTypes(const TArray<TEnumAsByte<EEntityTypes>>& EntityTypes) const;
 	TArray<AActor*> GetEntitiesBySpawnIndexAndType(const int32& SpawnIndex, const TEnumAsByte<EEntityTypes>& EntityType) const;
-	TArray<AActor*> GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const;
-	TArray<AActor*> GetEntitiesExceptByTypes(TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const;
-	TArray<AActor*> GetEntitiesBySpawnIndexExceptByType(const int32 SpawnIndex, TEnumAsByte<EEntityTypes> EntityType) const;
-	TArray<AActor*> GetEntitiesBySpawnIndexExceptByTypes(const int32 SpawnIndex, TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const;
+	TArray<AActor*> GetEntitiesBySpawnIndexAndTypes(const int32& SpawnIndex, const TArray<TEnumAsByte<EEntityTypes>>& EntityTypes) const;
 	
 	void RegisterEntity(AActor* Actor);
 	void UnregisterEntity(AActor* Actor);
 private:
-	TMap<TEnumAsByte<EEntityTypes>, TArray<TWeakObjectPtr<AActor>>> EntityMap;
-	AActor* GetEntityBySpawnIndexAndType(const int32 SpawnIndex, const TEnumAsByte<EEntityTypes> EntityType) const;
+	TMap<int32, TArray<TWeakObjectPtr<AActor>>> EntityMap;
 };

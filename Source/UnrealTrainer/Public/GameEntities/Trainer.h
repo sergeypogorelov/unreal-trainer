@@ -9,12 +9,10 @@
 #include "TrainingServer.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
 #include "GameCore/Interfaces/GameMultiSpawnInterface.h"
-#include "GameFramework/Actor.h"
-#include "GameShared/BotControllerBase.h"
 #include "Trainer.generated.h"
 
 UCLASS()
-class UNREALTRAINER_API ATrainer : public AActor, public IGameEntityInterface, public IGameMultiSpawnInterface
+class UNREALTRAINER_API ATrainer : public AInfo, public IGameEntityInterface, public IGameMultiSpawnInterface
 {
 	GENERATED_BODY()
 
@@ -31,7 +29,7 @@ public:
 
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
 	virtual int32 GetSpawnIndex() const override;
-	virtual void SetSpawnIndex(const int32 SpawnIndexVar) override;
+	virtual void SetSpawnIndex(const int32& SpawnIndexVar) override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -42,11 +40,10 @@ private:
 	TWeakObjectPtr<ATrainingServer> TrainingServerPtr;
 	TWeakObjectPtr<AGamePlayState> GamePlayStatePtr;
 	TWeakObjectPtr<ABotBase> BotPtr;
-	TWeakObjectPtr<ABotControllerBase> BotControllerPtr;
 	TArray<TWeakObjectPtr<ARewardBase>> RewardPtrs;
 
 	TArray<TWeakObjectPtr<ARewardBase>> GetValidRewardPtrs() const;
-	void SendObservations(const int32 Rewards, const bool bIsDone);
+	void SendObservations(const int32& Rewards, const bool& bIsDone);
 	void UpdateDynamicEntityPtrs();
 	void UpdateRewardPtrs();
 	float CalcAngleToClosestReward() const;

@@ -3,6 +3,7 @@
 #include "GameShared/Subsystems/EntityRegistrySubsystem.h"
 #include "GameCore/Interfaces/GameEntityInterface.h"
 #include "GameCore/Interfaces/GameMultiSpawnInterface.h"
+#include "GameShared/Utils/CollectionUtils.h"
 #include "GameShared/Utils/PrintUtils.h"
 
 void UEntityRegistrySubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -19,16 +20,15 @@ void UEntityRegistrySubsystem::Deinitialize()
 
 AActor* UEntityRegistrySubsystem::GetTrainingServer() const
 {
-	TArray<AActor*> FoundActors = GetEntitiesByType(Server);
-	return FoundActors.Num() > 0 ? FoundActors[0] : nullptr;
+	return GetEntityByType(Server);
 }
 
-AActor* UEntityRegistrySubsystem::GetGamePlayState(const int32 SpawnIndex) const
+AActor* UEntityRegistrySubsystem::GetGamePlayState(const int32& SpawnIndex) const
 {
 	return GetEntityBySpawnIndexAndType(SpawnIndex, State);
 }
 
-AActor* UEntityRegistrySubsystem::GetBot(const int32 SpawnIndex) const
+AActor* UEntityRegistrySubsystem::GetBot(const int32& SpawnIndex) const
 {
 	return GetEntityBySpawnIndexAndType(SpawnIndex, Bot);
 }
@@ -38,78 +38,73 @@ TArray<AActor*> UEntityRegistrySubsystem::GetRewards(const int32& SpawnIndex) co
 	return GetEntitiesBySpawnIndexAndType(SpawnIndex, Reward);
 }
 
-TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesByType(const TEnumAsByte<EEntityTypes> EntityType) const
+AActor* UEntityRegistrySubsystem::GetEntityByType(const TEnumAsByte<EEntityTypes>& EntityType) const
 {
-	TArray<AActor*> FoundActors;
-	if (!EntityMap.Contains(EntityType))
-	{
-		return FoundActors;
-	}
+	AActor* FoundActor = nullptr;
 
-	for (const TWeakObjectPtr<AActor> EntityPtr : EntityMap[EntityType])
-	{
-		if (EntityPtr.IsValid())
-		{
-			FoundActors.Add(EntityPtr.Get());
-		}
-	}
-
-	return FoundActors;
-}
-
-TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesBySpawnIndexAndType(const int32& SpawnIndex,
-	const TEnumAsByte<EEntityTypes>& EntityType) const
-{
-	TArray<AActor*> FoundActors;
-
-	if (!EntityMap.Contains(EntityType))
-	{
-		return FoundActors;
-	}
-
-	TArray<TWeakObjectPtr<AActor>> FilteredActorPtrs = EntityMap[EntityType].FilterByPredicate([&SpawnIndex](const TWeakObjectPtr<AActor>& ActorPtr)
+	for (const TWeakObjectPtr<AActor>& ActorPtr : EntityMap[0])
 	{
 		if (!ActorPtr.IsValid())
 		{
-			return false;
+			continue;
 		}
-
-		const IGameMultiSpawnInterface* GameMultiSpawnEntity = Cast<IGameMultiSpawnInterface>(ActorPtr.Get());
-		if (GameMultiSpawnEntity == nullptr)
+		
+		if (Cast<IGameEntityInterface>(ActorPtr.Get())->GetEntityType() == EntityType)
 		{
-			return false;
+			FoundActor = ActorPtr.Get();
+			break;
 		}
-
-		return GameMultiSpawnEntity->GetSpawnIndex() == SpawnIndex;
-	});
-
-	for (const TWeakObjectPtr<AActor>& ActorPtr : FilteredActorPtrs)
-	{
-		FoundActors.Add(ActorPtr.Get());
 	}
 	
-	return FoundActors;
+	return FoundActor;
 }
 
-TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesExceptByType(TEnumAsByte<EEntityTypes> EntityType) const
+AActor* UEntityRegistrySubsystem::GetEntityBySpawnIndexAndType(const int32& SpawnIndex,
+                                                               const TEnumAsByte<EEntityTypes>& EntityType) const
 {
-	return GetEntitiesExceptByTypes({ EntityType });
-}
+	AActor* FoundActor = nullptr;
 
-TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesExceptByTypes(TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const
-{
-	TArray<AActor*> FoundActors;
-	
-	for (const TTuple<TEnumAsByte<EEntityTypes>, TArray<TWeakObjectPtr<AActor>>> Pair : EntityMap)
+	if (!EntityMap.Contains(SpawnIndex))
 	{
-		if (EntityTypes.Contains(Pair.Key))
+		return nullptr;
+	}
+
+	for (const TWeakObjectPtr<AActor>& ActorPtr : EntityMap[SpawnIndex])
+	{
+		if (!ActorPtr.IsValid())
 		{
 			continue;
 		}
-
-		for (const TWeakObjectPtr<AActor> ActorPtr : Pair.Value)
+		
+		if (Cast<IGameEntityInterface>(ActorPtr.Get())->GetEntityType() == EntityType)
 		{
-			if (ActorPtr.IsValid())
+			FoundActor = ActorPtr.Get();
+			break;
+		}
+	}
+	
+	return FoundActor;
+}
+
+TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesByType(const TEnumAsByte<EEntityTypes>& EntityType) const
+{
+	return GetEntitiesByTypes({ EntityType });
+}
+
+TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesByTypes(const TArray<TEnumAsByte<EEntityTypes>>& EntityTypes) const
+{
+	TArray<AActor*> FoundActors;
+	
+	for (const TTuple<int32, TArray<TWeakObjectPtr<AActor>>>& Pair : EntityMap)
+	{
+		for (const TWeakObjectPtr<AActor>& ActorPtr : Pair.Value)
+		{
+			if (!ActorPtr.IsValid())
+			{
+				continue;
+			}
+			
+			if (EntityTypes.Contains(Cast<IGameEntityInterface>(ActorPtr.Get())->GetEntityType()))
 			{
 				FoundActors.Add(ActorPtr.Get());
 			}
@@ -119,21 +114,36 @@ TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesExceptByTypes(TArray<TEnumA
 	return FoundActors;
 }
 
-TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesBySpawnIndexExceptByType(const int32 SpawnIndex,
-	TEnumAsByte<EEntityTypes> EntityType) const
+TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesBySpawnIndexAndType(const int32& SpawnIndex,
+	const TEnumAsByte<EEntityTypes>& EntityType) const
 {
-	return GetEntitiesBySpawnIndexExceptByTypes(SpawnIndex, { EntityType });
+	return GetEntitiesBySpawnIndexAndTypes(SpawnIndex, { EntityType });
 }
 
-TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesBySpawnIndexExceptByTypes(const int32 SpawnIndex,
-	TArray<TEnumAsByte<EEntityTypes>> EntityTypes) const
+TArray<AActor*> UEntityRegistrySubsystem::GetEntitiesBySpawnIndexAndTypes(const int32& SpawnIndex,
+	const TArray<TEnumAsByte<EEntityTypes>>& EntityTypes) const
 {
-	const TArray<AActor*> FoundActors = GetEntitiesExceptByTypes(EntityTypes);
-	return FoundActors.FilterByPredicate([SpawnIndex](AActor* CurrentActor)
+	TArray<AActor*> FoundActors;
+
+	if (!EntityMap.Contains(SpawnIndex))
 	{
-		const IGameMultiSpawnInterface* MultiSpawnActor = Cast<IGameMultiSpawnInterface>(CurrentActor);
-		return MultiSpawnActor != nullptr && MultiSpawnActor->GetSpawnIndex() == SpawnIndex;
-	});
+		return FoundActors;
+	}
+
+	for (const TWeakObjectPtr<AActor>& ActorPtr : EntityMap[SpawnIndex])
+	{
+		if (!ActorPtr.IsValid())
+		{
+			continue;
+		}
+		
+		if (EntityTypes.Contains(Cast<IGameEntityInterface>(ActorPtr.Get())->GetEntityType()))
+		{
+			FoundActors.Add(ActorPtr.Get());
+		}
+	}
+	
+	return FoundActors;
 }
 
 void UEntityRegistrySubsystem::RegisterEntity(AActor* Actor)
@@ -145,13 +155,15 @@ void UEntityRegistrySubsystem::RegisterEntity(AActor* Actor)
 		return;
 	}
 
-	const TEnumAsByte<EEntityTypes> EntityType = GameEntity->GetEntityType();
-	if (!EntityMap.Contains(EntityType))
+	int32 SpawnIndex = 0;
+	const IGameMultiSpawnInterface* MultiSpawnEntity = Cast<IGameMultiSpawnInterface>(Actor);
+
+	if (MultiSpawnEntity != nullptr)
 	{
-		EntityMap.Add(EntityType, TArray<TWeakObjectPtr<AActor>>());
+		SpawnIndex = MultiSpawnEntity->GetSpawnIndex();
 	}
 
-	EntityMap[EntityType].Add(Actor);
+	UCollectionUtils::GetMapValue(EntityMap, SpawnIndex).Add(Actor);
 }
 
 void UEntityRegistrySubsystem::UnregisterEntity(AActor* Actor)
@@ -163,18 +175,13 @@ void UEntityRegistrySubsystem::UnregisterEntity(AActor* Actor)
 		return;
 	}
 
-	const TEnumAsByte<EEntityTypes> EntityType = GameEntity->GetEntityType();
-	EntityMap[EntityType].Remove(Actor);
-}
+	int32 SpawnIndex = 0;
+	const IGameMultiSpawnInterface* MultiSpawnEntity = Cast<IGameMultiSpawnInterface>(Actor);
 
-AActor* UEntityRegistrySubsystem::GetEntityBySpawnIndexAndType(const int32 SpawnIndex,
-	const TEnumAsByte<EEntityTypes> EntityType) const
-{
-	TArray<AActor*> FoundActors = GetEntitiesByType(EntityType).FilterByPredicate([SpawnIndex](AActor* Actor)
+	if (MultiSpawnEntity != nullptr)
 	{
-		const IGameMultiSpawnInterface* MultiSpawnActor = Cast<IGameMultiSpawnInterface>(Actor);
-		return MultiSpawnActor->GetSpawnIndex() == SpawnIndex;
-	});
-	
-	return FoundActors.Num() > 0 ? FoundActors[0] : nullptr;
+		SpawnIndex = MultiSpawnEntity->GetSpawnIndex();
+	}
+
+	UCollectionUtils::GetMapValue(EntityMap, SpawnIndex).Remove(Actor);
 }

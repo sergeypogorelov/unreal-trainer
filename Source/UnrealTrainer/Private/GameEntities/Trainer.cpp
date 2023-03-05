@@ -26,7 +26,7 @@ int32 ATrainer::GetSpawnIndex() const
 	return SpawnIndex;
 }
 
-void ATrainer::SetSpawnIndex(const int32 SpawnIndexVar)
+void ATrainer::SetSpawnIndex(const int32& SpawnIndexVar)
 {
 	SpawnIndex = SpawnIndexVar;
 }
@@ -79,7 +79,7 @@ void ATrainer::BeginPlay()
 			
 			BotPtr->RawMovementComponent->Unfreeze();
 		});
-		EntityEventSubsystem->OnStepEnd(GetSpawnIndex()).AddLambda([this](const int32 RewardsCollected)
+		EntityEventSubsystem->OnStepEnd(GetSpawnIndex()).AddLambda([this](const int32& RewardsCollected)
 		{
 			if (!bIsServerReady)
 			{
@@ -95,7 +95,7 @@ void ATrainer::BeginPlay()
 			BotPtr->RawMovementComponent->Freeze();
 			SendObservations(RewardsCollected, false);
 		});
-		EntityEventSubsystem->OnRoundEnd(GetSpawnIndex()).AddLambda([this](const bool bIsVictorious, const int32 RewardsCollected)
+		EntityEventSubsystem->OnRoundEnd(GetSpawnIndex()).AddLambda([this](const bool& bIsVictorious, const int32& RewardsCollected)
 		{
 			if (!bIsServerReady)
 			{
@@ -169,7 +169,7 @@ TArray<TWeakObjectPtr<ARewardBase>> ATrainer::GetValidRewardPtrs() const
 	});
 }
 
-void ATrainer::SendObservations(const int32 Rewards, const bool bIsDone)
+void ATrainer::SendObservations(const int32& Rewards, const bool& bIsDone)
 {
 	FTrainingObservations TrainingObservation;
 
@@ -212,7 +212,6 @@ void ATrainer::UpdateDynamicEntityPtrs()
 	const UEntityRegistrySubsystem* RegistrySubsystem = GetGameInstance()->GetSubsystem<UEntityRegistrySubsystem>();
 	
 	BotPtr = Cast<ABotBase>(RegistrySubsystem->GetBot(GetSpawnIndex()));
-	BotControllerPtr = Cast<ABotControllerBase>(BotPtr->GetController());
 
 	UpdateRewardPtrs();
 }

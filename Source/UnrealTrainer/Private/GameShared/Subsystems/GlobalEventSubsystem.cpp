@@ -3,7 +3,7 @@
 #include "GameShared/Subsystems/GlobalEventSubsystem.h"
 #include "GameShared/Utils/CollectionUtils.h"
 
-TMulticastDelegate<void()>& UGlobalEventSubsystem::OnDynamicEntitiesSpawned(const int32 SpawnIndex)
+TMulticastDelegate<void()>& UGlobalEventSubsystem::OnDynamicEntitiesSpawned(const int32& SpawnIndex)
 {
 	return UCollectionUtils::GetMapValue(OnDynamicEntitiesSpawnedMap, SpawnIndex);
 }

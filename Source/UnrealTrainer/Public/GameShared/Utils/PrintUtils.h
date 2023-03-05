@@ -12,11 +12,11 @@ class UNREALTRAINER_API UPrintUtils : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static void PrintAsError(const FString& Message, const float TimeToDisplay = 2.f);
+	static void PrintAsError(const FString& Message, const float& TimeToDisplay = 2.f);
 
 	UFUNCTION(BlueprintCallable)
-	static void PrintAsWarning(const FString& Message, const float TimeToDisplay = 2.f);
+	static void PrintAsWarning(const FString& Message, const float& TimeToDisplay = 2.f);
 
 	UFUNCTION(BlueprintCallable)
-	static void PrintAsInfo(const FString& Message, const float TimeToDisplay = 2.f);
+	static void PrintAsInfo(const FString& Message, const float& TimeToDisplay = 2.f);
 };

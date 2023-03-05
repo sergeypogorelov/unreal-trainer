@@ -29,7 +29,7 @@ public:
 	
 	virtual TEnumAsByte<EEntityTypes> GetEntityType() const override;
 	virtual int32 GetSpawnIndex() const override;
-	virtual void SetSpawnIndex(const int32 SpawnIndexVar) override;
+	virtual void SetSpawnIndex(const int32& SpawnIndexVar) override;
 	virtual void Tick(float DeltaSeconds) override;
 protected:
 	UFUNCTION()

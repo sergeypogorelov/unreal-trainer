@@ -12,7 +12,7 @@ class UNREALTRAINER_API UCollectionUtils : public UBlueprintFunctionLibrary
 
 public:
 	template <typename KeyType, typename ValType>
-	static ValType& GetMapValue(TMap<KeyType, ValType>& Map, const KeyType Key)
+	static ValType& GetMapValue(TMap<KeyType, ValType>& Map, const KeyType& Key)
 	{
 		if (!Map.Contains(Key))
 		{
@@ -21,6 +21,19 @@ public:
 		}
 
 		return Map[Key];
+	}
+
+	template <typename KeyType, typename ValType>
+	static void SetMapValue(TMap<KeyType, ValType>& Map, const KeyType& Key, const ValType& Value)
+	{
+		if (Map.Contains(Key))
+		{
+			Map[Key] = Value;
+		}
+		else
+		{
+			Map.Add(Value);
+		}
 	}
 	
 	template <typename KeyType, typename DelegateSignature>
